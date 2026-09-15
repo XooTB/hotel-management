@@ -38,28 +38,51 @@ Everyone can see their own shifts.
 - **Serving:** Gunicorn. Every request goes through Django; the only files it serves are uploaded room photos
 - **Container:** Debian `python:3.14-slim-trixie`, PostgreSQL from Debian, `tini` as PID 1
 
-## Quick start (Docker)
+## Quick start
 
-The only requirement is Docker with Compose v2.
+**You only need [Docker](https://docs.docker.com/get-docker/)** (Docker Desktop on Windows/macOS, or Docker Engine with the Compose plugin on Linux). Nothing else — no Python, Node or database to install.
 
 ```bash
-git clone <repository-url> hotel-management
+git clone https://github.com/XooTB/hotel-management.git
 cd hotel-management
-docker compose up --build
+docker compose up
 ```
 
-The first start takes a few minutes while the image builds and the database is created. When the log shows `Starting Gunicorn`, open:
+That's it. The first run takes a few minutes while Docker builds the image, creates the PostgreSQL database and loads demo data. **Wait for this message in the terminal:**
 
-- **Website:** <http://localhost:8000>
-- **Staff dashboard:** <http://localhost:8000/accounts/login/> (for example `manager` / `demo12345`; see [demo accounts](#demo-accounts))
+```
+  ================================================================
+    Grand Azure Hotel is ready!
 
-| Task | Command |
+    Website:      http://localhost:8000
+    Staff login:  http://localhost:8000/accounts/login/
+    Username:     manager      Password: demo12345
+  ================================================================
+```
+
+Then open **<http://localhost:8000>** in your browser.
+
+### Demo logins
+
+Every account uses the password **`demo12345`**. Each role sees a different part of the staff dashboard.
+
+| Username | Role | Can use |
+|---|---|---|
+| `manager` | Manager | Everything, including reports, room types and staff |
+| `reception` | Receptionist | Reservations, check-in/out, rooms, housekeeping, restaurant, billing |
+| `housekeeping` | Housekeeping | Room board and housekeeping tasks |
+| `restaurant` | Restaurant | Order board and menu |
+
+Guests don't need an account: book a room from the website, then use the booking reference under **Manage booking**.
+
+### Stopping and starting again
+
+| To… | Run |
 |---|---|
-| Run in the background | `docker compose up -d --build` |
-| Follow the logs | `docker compose logs -f` |
-| Stop (data is kept) | `docker compose down` |
-| Reset to fresh demo data | `docker compose down -v && docker compose up --build` |
-| Use another port if 8000 is taken | `HOTEL_PORT=8080 docker compose up --build` |
+| Stop | Press `Ctrl+C` in the terminal |
+| Start again (data kept) | `docker compose up` |
+| Start over with fresh demo data | `docker compose down -v` then `docker compose up` |
+| Use another port if 8000 is taken | `HOTEL_PORT=8080 docker compose up`, then open <http://localhost:8080> |
 
 ### What happens inside the container
 
@@ -73,18 +96,6 @@ PostgreSQL and the Django app run in the same container. On start, `docker/entry
 6. starts Gunicorn as a non-root user.
 
 On `docker stop` it shuts down Gunicorn and then PostgreSQL cleanly. Everything that needs to persist (database, uploaded photos, secret key) lives in the single `/var/lib/hotel` volume.
-
-### Demo accounts
-
-All demo accounts use the password **`demo12345`**.
-
-| Username | Role |
-|---|---|
-| `admin` | Manager (superuser) |
-| `manager` | Manager |
-| `reception` | Receptionist |
-| `housekeeping` | Housekeeping |
-| `restaurant` | Restaurant |
 
 ### Environment variables
 

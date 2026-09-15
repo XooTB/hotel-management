@@ -21,8 +21,8 @@ cleanup() {
   as_postgres "$PG_BIN/pg_ctl" -D "$PGDATA" -m fast -w stop > /dev/null 2>&1 || true
 }
 trap cleanup EXIT
-trap 'exit 143' TERM
-trap 'exit 130' INT
+# docker stop / Ctrl+C is a normal shutdown, so report success.
+trap 'exit 0' TERM INT
 
 # --- persistent data (single volume) -----------------------------------------
 mkdir -p "$PGDATA" "$MEDIA_ROOT" "$PG_SOCKET_DIR"
@@ -82,4 +82,27 @@ HOME=/home/app setpriv --reuid=app --regid=app --init-groups \
     --graceful-timeout 5 \
     --access-logfile - --error-logfile - &
 APP_PID=$!
+
+# Tell whoever is watching the logs where to go, once the site actually responds.
+for _ in $(seq 1 120); do
+  if curl -fs -o /dev/null http://127.0.0.1:8000/; then
+    cat <<BANNER
+
+  ================================================================
+    ${HOTEL_NAME:-Grand Azure Hotel} is ready!
+
+    Website:      http://localhost:${HOTEL_PORT:-8000}
+    Staff login:  http://localhost:${HOTEL_PORT:-8000}/accounts/login/
+    Username:     manager      Password: demo12345
+
+    Stop with Ctrl+C (your data is kept).
+  ================================================================
+
+BANNER
+    break
+  fi
+  kill -0 "$APP_PID" 2>/dev/null || break
+  sleep 1
+done
+
 wait "$APP_PID"

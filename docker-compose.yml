@@ -3,9 +3,11 @@ services:
   hotel:
     build: .
     image: hotel-management:latest
+    pull_policy: build              # `docker compose up` builds the image itself (cached after the first run)
     ports:
       - "${HOTEL_PORT:-8000}:8000"   # HOTEL_PORT=8080 docker compose up  if 8000 is taken
     environment:
+      HOTEL_PORT: "${HOTEL_PORT:-8000}"   # only used to print the right URL in the logs
       DEMO_DATA: "1"                 # load demo rooms, staff and bookings on first start
       TIME_ZONE: "UTC"
       # DJANGO_CSRF_TRUSTED_ORIGINS: "https://hotel.example.com"
