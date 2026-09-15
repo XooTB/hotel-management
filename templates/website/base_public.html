@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block body %}
+{% include "components/messages.html" %}
+<header x-data="{ open: false }" class="sticky top-0 z-40 border-b border-slate-200/70 bg-white/85 backdrop-blur">
+  <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+    <a href="{% url 'website:home' %}" class="flex items-center gap-2.5">
+      <span class="grid h-9 w-9 place-items-center rounded-full bg-brand-900 text-gold-400">{% icon 'star' 'h-4 w-4' %}</span>
+      <span class="font-display text-xl font-semibold text-brand-900">{{ HOTEL_NAME }}</span>
+    </a>
+    <nav class="hidden items-center gap-8 text-sm font-medium text-slate-600 md:flex">
+      <a href="{% url 'website:room_list' %}" class="hover:text-brand-700">Rooms &amp; Suites</a>
+      <a href="{% url 'website:home' %}#dining" class="hover:text-brand-700">Dining</a>
+      <a href="{% url 'website:lookup' %}" class="hover:text-brand-700">Manage booking</a>
+      <a href="{% url 'website:search' %}" class="btn-gold">Book your stay</a>
+    </nav>
+    <button type="button" class="p-2 text-slate-600 md:hidden" @click="open = !open" aria-label="Toggle menu">{% icon 'menu' %}</button>
+  </div>
+  <div x-show="open" x-cloak x-transition class="space-y-1 border-t border-slate-200 bg-white px-4 py-3 text-sm font-medium md:hidden">
+    <a href="{% url 'website:room_list' %}" class="block rounded-lg px-3 py-2 hover:bg-slate-50">Rooms &amp; Suites</a>
+    <a href="{% url 'website:home' %}#dining" class="block rounded-lg px-3 py-2 hover:bg-slate-50">Dining</a>
+    <a href="{% url 'website:lookup' %}" class="block rounded-lg px-3 py-2 hover:bg-slate-50">Manage booking</a>
+    <a href="{% url 'website:search' %}" class="btn-gold mt-2 w-full">Book your stay</a>
+  </div>
+</header>
+
+<main>{% block content %}{% endblock %}</main>
+
+<footer class="bg-brand-900 text-brand-100">
+  <div class="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-4 lg:px-8">
+    <div class="md:col-span-2">
+      <p class="font-display text-2xl text-white">{{ HOTEL_NAME }}</p>
+      <p class="mt-3 max-w-sm text-sm text-brand-100/80">Waterfront rooms, a celebrated kitchen and service that remembers how you take your coffee.</p>
+    </div>
+    <div class="space-y-2 text-sm">
+      <p class="font-semibold uppercase tracking-wider text-gold-400">Visit</p>
+      <p class="flex items-center gap-2">{% icon 'map-pin' 'h-4 w-4' %} 12 Harbour Promenade</p>
+      <p class="flex items-center gap-2">{% icon 'phone' 'h-4 w-4' %} +1 (555) 010-2040</p>
+      <p class="flex items-center gap-2">{% icon 'mail' 'h-4 w-4' %} stay@grandazure.local</p>
+    </div>
+    <div class="space-y-2 text-sm">
+      <p class="font-semibold uppercase tracking-wider text-gold-400">Your stay</p>
+      <p>Check-in from {{ CHECK_IN_TIME }}</p>
+      <p>Check-out by {{ CHECK_OUT_TIME }}</p>
+      <p><a href="{% url 'website:lookup' %}" class="underline-offset-4 hover:underline">Manage your booking</a></p>
+      <p><a href="{% url 'accounts:login' %}" class="underline-offset-4 hover:underline">Staff sign in</a></p>
+    </div>
+  </div>
+  <div class="border-t border-white/10 py-5 text-center text-xs text-brand-100/60">© {% now "Y" %} {{ HOTEL_NAME }}. All rights reserved.</div>
+</footer>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends "dashboard/base.html" %}
+{% load l10n %}
+{% block title %}New order · {{ HOTEL_NAME }}{% endblock %}
+{% block content %}
+<a href="{% url 'restaurant:order_list' %}" class="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-brand-700">{% icon 'arrow-left' 'h-4 w-4' %} Order board</a>
+<h1 class="mt-2 font-display text-3xl font-semibold text-brand-900">New order</h1>
+
+<form method="post" class="mt-6 grid gap-6 lg:grid-cols-[1fr_22rem]"
+      x-data="{ qty: {}, prices: {}, type: '{{ form.order_type.value|default:"dine_in" }}',
+                get count() { return Object.values(this.qty).reduce((s, n) => s + (Number(n) || 0), 0) },
+                get total() { return Object.keys(this.qty).reduce((s, id) => s + (Number(this.qty[id]) || 0) * this.prices[id], 0) } }">
+  {% csrf_token %}
+  <div class="space-y-6">
+    {% for category in categories %}
+    <section class="card overflow-hidden">
+      <h2 class="border-b border-slate-200 bg-slate-50 px-5 py-3 text-xs font-semibold uppercase tracking-widest text-slate-600">{{ category.name }}</h2>
+      <ul class="divide-y divide-slate-100">
+        {% for item in category.items.all %}
+        <li class="flex items-center gap-4 px-5 py-3" x-init="prices[{{ item.pk }}] = {{ item.price|unlocalize }}; qty[{{ item.pk }}] = {{ quantities|get_item:item.pk|default:0 }}">
+          <div class="min-w-0 flex-1">
+            <p class="font-medium text-slate-900">{{ item.name }}</p>
+            {% if item.description %}<p class="truncate text-xs text-slate-500">{{ item.description }}</p>{% endif %}
+          </div>
+          <p class="w-20 text-right text-sm text-slate-700">{{ item.price|money }}</p>
+          <div class="flex items-center rounded-lg border border-slate-300 bg-white" :class="qty[{{ item.pk }}] > 0 && 'border-brand-500 ring-2 ring-brand-500/20'">
+            <button type="button" class="px-2.5 py-1.5 text-slate-500 hover:text-slate-900" @click="qty[{{ item.pk }}] = Math.max(0, (Number(qty[{{ item.pk }}]) || 0) - 1)" aria-label="Remove one {{ item.name }}">−</button>
+            <input type="number" min="0" max="99" name="qty_{{ item.pk }}" x-model.number="qty[{{ item.pk }}]" aria-label="Quantity of {{ item.name }}"
+                   class="w-10 border-0 bg-transparent p-0 text-center text-sm focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none">
+            <button type="button" class="px-2.5 py-1.5 text-slate-500 hover:text-slate-900" @click="qty[{{ item.pk }}] = Math.min(99, (Number(qty[{{ item.pk }}]) || 0) + 1)" aria-label="Add one {{ item.name }}">+</button>
+          </div>
+        </li>
+        {% empty %}
+        <li class="px-5 py-4 text-sm text-slate-500">Nothing available in this category.</li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% empty %}
+    <div class="card p-6 text-slate-500">The menu is empty. <a href="{% url 'restaurant:item_create' %}" class="font-medium underline">Add menu items</a> first.</div>
+    {% endfor %}
+  </div>
+
+  <aside class="h-fit space-y-4 lg:sticky lg:top-24">
+    <div class="card space-y-4 p-5">
+      {% if form.non_field_errors %}<div class="rounded-lg bg-rose-50 p-3 text-sm text-rose-700">{% for e in form.non_field_errors %}<p>{{ e }}</p>{% endfor %}</div>{% endif %}
+      <div class="form-field" @change="type = $event.target.value">
+        <label for="{{ form.order_type.id_for_label }}">Order type</label>{{ form.order_type }}{{ form.order_type.errors }}
+      </div>
+      <div class="form-field" x-show="type === 'dine_in'">
+        <label for="{{ form.table_number.id_for_label }}">Table number</label>{{ form.table_number }}{{ form.table_number.errors }}
+      </div>
+      <div class="form-field">
+        <label for="{{ form.reservation.id_for_label }}">In-house guest</label>{{ form.reservation }}
+        <p class="helptext" x-show="type === 'dine_in'">Optional — only for hotel guests.</p>{{ form.reservation.errors }}
+      </div>
+      <div class="form-field">
+        <label class="flex items-center gap-2 font-normal">{{ form.charge_to_room }} <span class="font-medium">Charge to room bill</span></label>{{ form.charge_to_room.errors }}
+      </div>
+      <div class="form-field"><label for="{{ form.notes.id_for_label }}">Kitchen notes</label>{{ form.notes }}</div>
+    </div>
+    <div class="card p-5">
+      <div class="flex justify-between text-sm text-slate-500"><span>Items</span><span x-text="count">0</span></div>
+      <div class="mt-2 flex justify-between text-lg font-semibold text-slate-900"><span>Total</span><span x-text="'{{ CURRENCY }}' + total.toFixed(2)">{{ CURRENCY }}0.00</span></div>
+      <button type="submit" class="btn-primary mt-4 w-full" :disabled="count === 0">Send to kitchen</button>
+    </div>
+  </aside>
+</form>
+{% endblock %}

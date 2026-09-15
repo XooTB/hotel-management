@@ -1,0 +1,33 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Staff · {{ HOTEL_NAME }}{% endblock %}
+{% block content %}
+<div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <h1 class="font-display text-3xl font-semibold text-brand-900">Staff</h1>
+    <p class="mt-1 text-sm text-slate-500">Accounts and roles. Deactivate someone to revoke their access.</p>
+  </div>
+  <div class="flex gap-2">
+    <a href="{% url 'staff:shifts' %}" class="btn-secondary">{% icon 'clock' 'h-4 w-4' %} Shift schedule</a>
+    <a href="{% url 'staff:create' %}" class="btn-primary">{% icon 'plus' 'h-4 w-4' %} Add staff member</a>
+  </div>
+</div>
+<div class="card overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="table-base">
+      <thead><tr><th>Name</th><th>Role</th><th>Contact</th><th class="text-right">Upcoming shifts</th><th>Access</th><th></th></tr></thead>
+      <tbody class="divide-y divide-slate-100">
+        {% for member in staff_members %}
+        <tr class="{% if not member.is_active %}opacity-60{% endif %}">
+          <td><p class="font-medium text-slate-900">{{ member }}</p><p class="text-xs text-slate-500">@{{ member.username }}</p></td>
+          <td>{% if member.is_superuser %}{% badge "manager" "Administrator" %}{% else %}{% badge member.role member.get_role_display %}{% endif %}</td>
+          <td><p>{{ member.email|default:"—" }}</p><p class="text-xs text-slate-500">{{ member.phone }}</p></td>
+          <td class="text-right">{{ member.upcoming_shifts }}</td>
+          <td>{% if member.is_active %}<span class="badge bg-emerald-50 text-emerald-700">Active</span>{% else %}<span class="badge bg-slate-100 text-slate-600">Deactivated</span>{% endif %}</td>
+          <td class="text-right"><a href="{% url 'staff:update' member.pk %}" class="text-slate-400 hover:text-brand-700" aria-label="Edit {{ member }}">{% icon 'edit' 'h-4 w-4' %}</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

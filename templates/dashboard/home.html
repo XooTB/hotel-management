@@ -1,0 +1,142 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Overview · {{ HOTEL_NAME }}{% endblock %}
+{% block content %}
+<div class="mb-8 flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <h1 class="font-display text-3xl font-semibold text-brand-900">Hello, {% firstof user.first_name user.username %}</h1>
+    <p class="mt-1 text-sm text-slate-500">Here's what's happening at the hotel today.</p>
+  </div>
+  <div class="flex flex-wrap gap-2">
+    {% if show_front_desk %}<a href="{% url 'reservations:create' %}" class="btn-primary">{% icon 'plus' 'h-4 w-4' %} New reservation</a>{% endif %}
+    {% if show_restaurant %}<a href="{% url 'restaurant:order_create' %}" class="btn-secondary">{% icon 'utensils' 'h-4 w-4' %} New order</a>{% endif %}
+    {% if show_housekeeping %}<a href="{% url 'housekeeping:create' %}" class="btn-secondary">{% icon 'sparkles' 'h-4 w-4' %} New task</a>{% endif %}
+  </div>
+</div>
+
+{% if show_front_desk %}
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+  {% for stat in stats %}
+  <div class="card p-5">
+    <div class="flex items-center justify-between"><p class="text-sm text-slate-500">{{ stat.label }}</p><span class="text-slate-400">{% icon stat.icon 'h-5 w-5' %}</span></div>
+    <p class="mt-2 text-3xl font-semibold text-slate-900">{{ stat.value }}</p>
+    <p class="mt-1 text-xs text-slate-500">{{ stat.sub }}</p>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="mt-6 grid gap-6 xl:grid-cols-2">
+  <section class="card overflow-hidden">
+    <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+      <h2 class="font-semibold text-slate-900">Arrivals today</h2>
+      <a href="{% url 'reservations:list' %}?view=arrivals" class="text-sm text-brand-700 hover:underline">View all</a>
+    </div>
+    <ul class="divide-y divide-slate-100">
+      {% for r in arrivals|slice:":6" %}
+      <li class="flex items-center justify-between gap-4 px-5 py-3">
+        <div class="min-w-0">
+          <a href="{{ r.get_absolute_url }}" class="font-medium text-slate-900 hover:text-brand-700">{{ r.guest_name }}</a>
+          <p class="text-xs text-slate-500">{{ r.room_type.name }} · {{ r.nights }} night{{ r.nights|pluralize }} · <span class="font-mono">{{ r.reference }}</span></p>
+        </div>
+        <a href="{% url 'reservations:check_in' r.reference %}" class="btn-primary btn-sm">Check in</a>
+      </li>
+      {% empty %}
+      <li class="px-5 py-10 text-center text-sm text-slate-500">No more arrivals expected today.</li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <section class="card overflow-hidden">
+    <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+      <h2 class="font-semibold text-slate-900">Departures</h2>
+      <a href="{% url 'reservations:list' %}?view=departures" class="text-sm text-brand-700 hover:underline">View all</a>
+    </div>
+    <ul class="divide-y divide-slate-100">
+      {% for r in departures|slice:":6" %}
+      <li class="flex items-center justify-between gap-4 px-5 py-3">
+        <div class="min-w-0">
+          <a href="{{ r.get_absolute_url }}" class="font-medium text-slate-900 hover:text-brand-700">{{ r.guest_name }}</a>
+          <p class="text-xs text-slate-500">{{ r.room }} · {{ r.room_type.name }}{% if r.check_out < today %} · <span class="font-medium text-rose-600">overdue since {{ r.check_out|date:"j M" }}</span>{% endif %}</p>
+        </div>
+        <form method="post" action="{% url 'reservations:check_out' r.reference %}" onsubmit="return confirm('Check out {{ r.guest_name|escapejs }} and create the invoice?')">
+          {% csrf_token %}<button type="submit" class="btn-secondary btn-sm">Check out</button>
+        </form>
+      </li>
+      {% empty %}
+      <li class="px-5 py-10 text-center text-sm text-slate-500">No departures due.</li>
+      {% endfor %}
+    </ul>
+  </section>
+</div>
+{% endif %}
+
+<div class="mt-6 grid gap-6 xl:grid-cols-3">
+  {% if show_housekeeping %}
+  <section class="card overflow-hidden xl:col-span-2">
+    <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+      <h2 class="font-semibold text-slate-900">Rooms &amp; housekeeping</h2>
+      <a href="{% url 'housekeeping:list' %}" class="text-sm text-brand-700 hover:underline">All tasks</a>
+    </div>
+    <div class="grid grid-cols-2 gap-3 border-b border-slate-100 p-5 sm:grid-cols-4">
+      {% for value, label, count in room_statuses %}
+      <a href="{% url 'rooms:list' %}?status={{ value }}" class="rounded-lg border border-slate-200 p-3 transition hover:border-brand-200 hover:bg-brand-50/40">
+        <p class="flex items-center gap-2 text-xs text-slate-500">{% status_dot value %} {{ label }}</p>
+        <p class="mt-1 text-2xl font-semibold text-slate-900">{{ count }}</p>
+      </a>
+      {% endfor %}
+    </div>
+    <ul class="divide-y divide-slate-100">
+      {% for task in open_tasks %}
+      <li class="flex items-center justify-between gap-4 px-5 py-3 text-sm">
+        <div class="min-w-0">
+          <p class="font-medium text-slate-900">Room {{ task.room.number }} · {{ task.get_task_type_display }}</p>
+          <p class="truncate text-xs text-slate-500">{{ task.assigned_to|default:"Unassigned" }}{% if task.notes %} · {{ task.notes }}{% endif %}</p>
+        </div>
+        <div class="flex shrink-0 gap-2">{% badge task.priority task.get_priority_display %}{% badge task.status task.get_status_display %}</div>
+      </li>
+      {% empty %}
+      <li class="px-5 py-8 text-center text-sm text-slate-500">All caught up — no open tasks.</li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+
+  {% if show_restaurant %}
+  <section class="card overflow-hidden">
+    <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+      <h2 class="font-semibold text-slate-900">Kitchen queue</h2>
+      <a href="{% url 'restaurant:order_list' %}" class="text-sm text-brand-700 hover:underline">Order board</a>
+    </div>
+    <ul class="divide-y divide-slate-100">
+      {% for order in active_orders %}
+      <li class="flex items-center justify-between gap-4 px-5 py-3 text-sm">
+        <div class="min-w-0">
+          <p class="font-medium text-slate-900">#{{ order.pk }} · {{ order.location }}</p>
+          <p class="text-xs text-slate-500">{{ order.items.all|length }} item{{ order.items.all|length|pluralize }} · {{ order.created_at|timesince }} ago</p>
+        </div>
+        {% badge order.status order.get_status_display %}
+      </li>
+      {% empty %}
+      <li class="px-5 py-8 text-center text-sm text-slate-500">No orders in progress.</li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+
+  <section class="card overflow-hidden">
+    <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+      <h2 class="font-semibold text-slate-900">My upcoming shifts</h2>
+      <a href="{% url 'staff:shifts' %}" class="text-sm text-brand-700 hover:underline">Schedule</a>
+    </div>
+    <ul class="divide-y divide-slate-100">
+      {% for shift in my_shifts %}
+      <li class="flex items-center justify-between px-5 py-3 text-sm">
+        <span class="font-medium text-slate-900">{% if shift.date == today %}Today{% else %}{{ shift.date|date:"D j M" }}{% endif %}</span>
+        <span class="text-slate-600">{{ shift.start_time|time:"H:i" }}–{{ shift.end_time|time:"H:i" }}</span>
+      </li>
+      {% empty %}
+      <li class="px-5 py-8 text-center text-sm text-slate-500">No shifts scheduled.</li>
+      {% endfor %}
+    </ul>
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.pyc
+db.sqlite3
+media/
+staticfiles/
+static/css/
+.django_tailwind_cli/
+.env
+.playwright-mcp/

@@ -1,0 +1,21 @@
+<div id="availability" class="mt-4">
+  {% if form.is_bound %}
+    {% if form.errors %}
+      <div class="rounded-lg bg-rose-50 p-3 text-sm text-rose-700">
+        {% for field, errors in form.errors.items %}{% for error in errors %}<p>{{ error }}</p>{% endfor %}{% endfor %}
+      </div>
+    {% elif form.cleaned_data.guests > room_type.capacity %}
+      <div class="rounded-lg bg-amber-50 p-3 text-sm text-amber-800">This room sleeps up to {{ room_type.capacity }} guests. <a class="font-medium underline" href="{% url 'website:search' %}?{{ request.GET.urlencode }}">See rooms that fit your party</a>.</div>
+    {% elif available %}
+      <div class="rounded-lg bg-emerald-50 p-3 text-sm text-emerald-800">
+        <p class="font-medium">Available for your dates</p>
+        <p>{% if available <= 3 %}Only {{ available }} left at this rate.{% else %}Good availability.{% endif %}</p>
+      </div>
+      <a class="btn-primary mt-3 w-full" href="{% url 'website:book' room_type.slug %}?check_in={{ form.cleaned_data.check_in|date:'Y-m-d' }}&check_out={{ form.cleaned_data.check_out|date:'Y-m-d' }}&guests={{ form.cleaned_data.guests }}">Book now {% icon 'arrow-right' 'h-4 w-4' %}</a>
+    {% else %}
+      <div class="rounded-lg bg-slate-100 p-3 text-sm text-slate-700">Fully booked for those dates. <a class="font-medium underline" href="{% url 'website:search' %}?{{ request.GET.urlencode }}">Try another room</a>.</div>
+    {% endif %}
+  {% else %}
+    <p class="text-sm text-slate-500">Choose your dates to see availability.</p>
+  {% endif %}
+</div>

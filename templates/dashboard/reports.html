@@ -1,0 +1,213 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+{% block title %}Reports · {{ HOTEL_NAME }}{% endblock %}
+{% block head %}
+<style>
+  /* Chart tokens: one categorical slot (single-series charts) plus recessive chrome. */
+  .viz-root {
+    --series-1: #2a78d6;
+    --series-1-hover: #256abf;
+    --grid: #e2e8f0;
+    --text-primary: #0f172a;
+    --text-muted: #64748b;
+    --surface: #ffffff;
+  }
+</style>
+{% endblock %}
+{% block content %}
+<div class="viz-root" data-currency="{{ CURRENCY }}">
+  <div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <h1 class="font-display text-3xl font-semibold text-brand-900">Reports</h1>
+      <p class="mt-1 text-sm text-slate-500">Performance over the last {{ days }} days.</p>
+    </div>
+    <div class="flex gap-2" role="group" aria-label="Date range">
+      <a href="?days=7" class="pill {% if days == 7 %}pill-active{% endif %}">7 days</a>
+      <a href="?days=30" class="pill {% if days == 30 %}pill-active{% endif %}">30 days</a>
+      <a href="?days=90" class="pill {% if days == 90 %}pill-active{% endif %}">90 days</a>
+    </div>
+  </div>
+
+  <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+    {% for kpi in kpis %}
+    <div class="card p-5">
+      <p class="text-sm text-slate-500">{{ kpi.label }}</p>
+      <p class="mt-2 text-3xl font-semibold text-slate-900">{% if kpi.money %}{{ kpi.value|money }}{% else %}{{ kpi.value }}{% endif %}</p>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="mt-6 grid gap-6 xl:grid-cols-2">
+    <section class="card p-5">
+      <h2 class="font-semibold text-slate-900">Occupancy</h2>
+      <p class="text-xs text-slate-500">Share of rooms occupied each night</p>
+      <div class="relative mt-4 h-64"><canvas id="occupancy-chart" role="img" aria-label="Line chart of nightly occupancy percentage"></canvas></div>
+    </section>
+    <section class="card p-5">
+      <h2 class="font-semibold text-slate-900">Revenue collected</h2>
+      <p class="text-xs text-slate-500">Paid invoices per day, including tax</p>
+      <div class="relative mt-4 h-64"><canvas id="revenue-chart" role="img" aria-label="Column chart of daily revenue collected"></canvas></div>
+    </section>
+  </div>
+
+  <div class="mt-6 grid gap-6 xl:grid-cols-3">
+    <section class="card p-5">
+      <h2 class="font-semibold text-slate-900">Bookings by room type</h2>
+      <p class="text-xs text-slate-500">Reservations created in this period</p>
+      <div class="relative mt-4 h-56"><canvas id="type-chart" role="img" aria-label="Bar chart of bookings by room type"></canvas></div>
+    </section>
+    <section class="card p-5">
+      <h2 class="font-semibold text-slate-900">Bookings by channel</h2>
+      <p class="text-xs text-slate-500">Where reservations came from</p>
+      <div class="relative mt-4 h-56"><canvas id="source-chart" role="img" aria-label="Bar chart of bookings by channel"></canvas></div>
+    </section>
+    <section class="card overflow-hidden">
+      <div class="p-5 pb-3">
+        <h2 class="font-semibold text-slate-900">Top menu items</h2>
+        <p class="text-xs text-slate-500">Units sold in served orders</p>
+      </div>
+      <table class="table-base">
+        <tbody class="divide-y divide-slate-100">
+          {% for row in top_items %}
+          <tr><td class="text-slate-500">{{ forloop.counter }}</td><td class="w-full font-medium text-slate-900">{{ row.menu_item__name }}</td><td class="text-right tabular-nums">{{ row.qty }}</td></tr>
+          {% empty %}
+          <tr><td class="py-8 text-center text-slate-500">No orders in this period.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+  </div>
+
+  <details class="card mt-6 overflow-hidden">
+    <summary class="cursor-pointer px-5 py-4 text-sm font-medium text-slate-700 hover:bg-slate-50">Daily data table</summary>
+    <div class="max-h-96 overflow-auto border-t border-slate-200">
+      <table class="table-base">
+        <thead class="sticky top-0"><tr><th>Date</th><th class="text-right">Occupancy</th><th class="text-right">Revenue collected</th></tr></thead>
+        <tbody class="divide-y divide-slate-100">
+          {% for day, occ, rev in daily_rows %}
+          <tr><td>{{ day|date:"D j M Y" }}</td><td class="text-right tabular-nums">{{ occ }}%</td><td class="text-right tabular-nums">{{ rev|money }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </details>
+</div>
+
+{{ chart_data|json_script:"chart-data" }}
+<script src="{% static 'vendor/chart.umd.min.js' %}"></script>
+<script>
+  (() => {
+    const data = JSON.parse(document.getElementById('chart-data').textContent);
+    const root = document.querySelector('.viz-root');
+    const token = (name) => getComputedStyle(root).getPropertyValue(name).trim();
+    const series = token('--series-1');
+    const seriesHover = token('--series-1-hover');
+    const grid = token('--grid');
+    const ink = token('--text-primary');
+    const muted = token('--text-muted');
+    const surface = token('--surface');
+    const currency = root.dataset.currency;
+    const money = (n) => currency + Number(n).toLocaleString(undefined, { maximumFractionDigits: 0 });
+
+    Chart.defaults.font.family = getComputedStyle(document.body).fontFamily;
+    Chart.defaults.font.size = 12;
+    Chart.defaults.color = muted;
+    Chart.defaults.maintainAspectRatio = false;
+    Chart.defaults.plugins.legend.display = false; // every chart is single-series; the title names it
+
+    const tooltip = {
+      backgroundColor: '#0f172a', titleColor: '#ffffff', bodyColor: '#e2e8f0',
+      padding: 10, cornerRadius: 8, displayColors: false, titleFont: { weight: '600' },
+    };
+    const valueAxis = { grid: { color: grid, lineWidth: 1, drawTicks: false }, border: { display: false }, ticks: { padding: 8 } };
+    const categoryAxis = { grid: { display: false }, border: { color: grid }, ticks: { padding: 6, maxRotation: 0, autoSkip: true, maxTicksLimit: 8 } };
+
+    // Value at the end of each horizontal bar, in text ink (never the series colour).
+    const barEndLabels = {
+      id: 'barEndLabels',
+      afterDatasetsDraw(chart) {
+        const { ctx } = chart;
+        ctx.save();
+        ctx.fillStyle = ink;
+        ctx.font = `600 12px ${Chart.defaults.font.family}`;
+        ctx.textBaseline = 'middle';
+        chart.getDatasetMeta(0).data.forEach((bar, i) => ctx.fillText(chart.data.datasets[0].data[i], bar.x + 6, bar.y));
+        ctx.restore();
+      },
+    };
+
+    new Chart(document.getElementById('occupancy-chart'), {
+      type: 'line',
+      data: {
+        labels: data.labels,
+        datasets: [{
+          data: data.occupancy, borderColor: series, borderWidth: 2, borderJoinStyle: 'round', borderCapStyle: 'round',
+          backgroundColor: series + '1a', fill: 'origin', tension: 0.3,
+          pointRadius: 0, pointHitRadius: 12, pointHoverRadius: 5,
+          pointHoverBackgroundColor: series, pointHoverBorderColor: surface, pointHoverBorderWidth: 2,
+        }],
+      },
+      options: {
+        interaction: { mode: 'index', intersect: false },
+        scales: { x: categoryAxis, y: { ...valueAxis, min: 0, max: 100, ticks: { ...valueAxis.ticks, stepSize: 25, callback: (v) => v + '%' } } },
+        plugins: { tooltip: { ...tooltip, callbacks: { label: (c) => `Occupancy ${c.parsed.y}%` } } },
+      },
+      plugins: [{
+        id: 'crosshair',
+        afterDraw(chart) {
+          const active = chart.tooltip?.getActiveElements?.() || [];
+          if (!active.length) return;
+          const { ctx, chartArea } = chart;
+          ctx.save();
+          ctx.strokeStyle = grid;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(active[0].element.x, chartArea.top);
+          ctx.lineTo(active[0].element.x, chartArea.bottom);
+          ctx.stroke();
+          ctx.restore();
+        },
+      }],
+    });
+
+    new Chart(document.getElementById('revenue-chart'), {
+      type: 'bar',
+      data: {
+        labels: data.labels,
+        datasets: [{
+          data: data.revenue, backgroundColor: series, hoverBackgroundColor: seriesHover,
+          borderRadius: 4, borderSkipped: 'start', maxBarThickness: 24, categoryPercentage: 0.85, barPercentage: 0.85,
+        }],
+      },
+      options: {
+        interaction: { mode: 'index', intersect: false },
+        scales: { x: categoryAxis, y: { ...valueAxis, beginAtZero: true, ticks: { ...valueAxis.ticks, callback: (v) => money(v) } } },
+        plugins: { tooltip: { ...tooltip, callbacks: { label: (c) => `Collected ${money(c.parsed.y)}` } } },
+      },
+    });
+
+    const horizontalBar = (id, chartData, label) => new Chart(document.getElementById(id), {
+      type: 'bar',
+      data: {
+        labels: chartData.labels,
+        datasets: [{
+          data: chartData.values, backgroundColor: series, hoverBackgroundColor: seriesHover,
+          borderRadius: 4, borderSkipped: 'start', maxBarThickness: 24, categoryPercentage: 0.8, barPercentage: 0.9,
+        }],
+      },
+      options: {
+        indexAxis: 'y',
+        layout: { padding: { right: 28 } },
+        scales: {
+          x: { ...valueAxis, beginAtZero: true, ticks: { ...valueAxis.ticks, precision: 0 } },
+          y: { grid: { display: false }, border: { color: grid }, ticks: { color: ink } },
+        },
+        plugins: { tooltip: { ...tooltip, callbacks: { label: (c) => `${c.parsed.x} ${label}` } } },
+      },
+      plugins: [barEndLabels],
+    });
+    horizontalBar('type-chart', data.byType, 'bookings');
+    horizontalBar('source-chart', data.bySource, 'bookings');
+  })();
+</script>
+{% endblock %}

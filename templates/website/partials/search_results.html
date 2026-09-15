@@ -1,0 +1,41 @@
+<div id="results" class="space-y-6">
+  {% if results is None %}
+    {% if form.errors %}
+      <div class="rounded-lg border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+        {% for field, errors in form.errors.items %}{% for error in errors %}<p>{{ error }}</p>{% endfor %}{% endfor %}
+      </div>
+    {% else %}
+      <p class="text-slate-500">Choose your dates and party size to see available rooms.</p>
+    {% endif %}
+  {% else %}
+    <p class="text-sm text-slate-600">{{ nights }} night{{ nights|pluralize }} · {{ form.cleaned_data.check_in|date:"D j M" }} → {{ form.cleaned_data.check_out|date:"D j M Y" }} · {{ form.cleaned_data.guests }} guest{{ form.cleaned_data.guests|pluralize }}</p>
+    {% for room_type in results %}
+    <article class="card grid overflow-hidden md:grid-cols-[18rem_1fr]">
+      {% include "website/partials/room_image.html" with css="h-48 md:h-full" %}
+      <div class="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 class="font-display text-2xl font-semibold text-brand-900"><a href="{{ room_type.get_absolute_url }}" class="hover:underline">{{ room_type.name }}</a></h2>
+          <p class="mt-1 text-sm text-slate-600">{{ room_type.short_description }}</p>
+          <p class="mt-3 flex flex-wrap gap-x-4 text-xs text-slate-500"><span>Up to {{ room_type.capacity }} guests</span><span>{{ room_type.bed_type }}</span><span>{{ room_type.size_sqm }} m²</span></p>
+          {% if room_type.available %}
+            <p class="mt-3 text-sm font-medium {% if room_type.available <= 3 %}text-amber-700{% else %}text-emerald-700{% endif %}">{% if room_type.available <= 3 %}Only {{ room_type.available }} left{% else %}Available{% endif %}</p>
+          {% else %}
+            <p class="mt-3 text-sm font-medium text-slate-500">Sold out for these dates</p>
+          {% endif %}
+        </div>
+        <div class="shrink-0 sm:text-right">
+          <p class="text-2xl font-semibold text-slate-900">{{ room_type.nightly_rate|times:nights|money }}</p>
+          <p class="text-xs text-slate-500">{{ room_type.nightly_rate|money }} × {{ nights }} night{{ nights|pluralize }}</p>
+          {% if room_type.available %}
+          <a class="btn-primary mt-3" href="{% url 'website:book' room_type.slug %}?check_in={{ form.cleaned_data.check_in|date:'Y-m-d' }}&check_out={{ form.cleaned_data.check_out|date:'Y-m-d' }}&guests={{ form.cleaned_data.guests }}">Book {% icon 'arrow-right' 'h-4 w-4' %}</a>
+          {% else %}
+          <span class="btn-secondary mt-3 cursor-not-allowed opacity-60">Unavailable</span>
+          {% endif %}
+        </div>
+      </div>
+    </article>
+    {% empty %}
+    <div class="card p-8 text-center text-slate-600">No rooms fit a party of {{ form.cleaned_data.guests }}. Try fewer guests per room.</div>
+    {% endfor %}
+  {% endif %}
+</div>

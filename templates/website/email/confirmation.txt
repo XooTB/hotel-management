@@ -1,0 +1,17 @@
+{% autoescape off %}Dear {{ reservation.guest_name }},
+
+Thank you for booking with {{ HOTEL_NAME }}. Your reservation is confirmed.
+
+Booking reference: {{ reservation.reference }}
+Room:              {{ reservation.room_type.name }}
+Check-in:          {{ reservation.check_in|date:"l, j F Y" }}
+Check-out:         {{ reservation.check_out|date:"l, j F Y" }}
+Guests:            {{ reservation.adults }} adult(s), {{ reservation.children }} child(ren)
+Room total:        {{ CURRENCY }}{{ reservation.room_total }} ({{ reservation.nights }} night(s), taxes added at check-out)
+
+Payment is taken at the hotel. To view or cancel your booking, visit
+{{ manage_url }} and enter your reference with this email address.
+
+We look forward to welcoming you.
+{{ HOTEL_NAME }}
+{% endautoescape %}

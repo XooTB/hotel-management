@@ -1,0 +1,14 @@
+<tr id="task-{{ task.pk }}" class="{% if task.status == 'done' %}bg-slate-50/60{% endif %}">
+  <td><p class="font-semibold text-slate-900">{{ task.room.number }}</p><p class="text-xs text-slate-500">{{ task.room.get_status_display }}</p></td>
+  <td><p>{{ task.get_task_type_display }}</p>{% if task.notes %}<p class="max-w-xs truncate text-xs text-slate-500">{{ task.notes }}</p>{% endif %}</td>
+  <td>{% badge task.priority task.get_priority_display %}</td>
+  <td>{{ task.assigned_to|default:"Unassigned" }}</td>
+  <td class="text-slate-500">{{ task.created_at|timesince }} ago</td>
+  <td>
+    <select name="status" aria-label="Task status" class="input w-36 py-1.5 text-xs"
+            hx-post="{% url 'housekeeping:set_status' task.pk %}" hx-target="#task-{{ task.pk }}" hx-swap="outerHTML">
+      {% for value, label in task.Status.choices %}<option value="{{ value }}" {% if value == task.status %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+  </td>
+  <td class="text-right"><a href="{% url 'housekeeping:update' task.pk %}" class="text-slate-400 hover:text-brand-700" aria-label="Edit task">{% icon 'edit' 'h-4 w-4' %}</a></td>
+</tr>

@@ -1,0 +1,16 @@
+{% extends "website/base_public.html" %}
+{% block title %}Rooms & Suites · {{ HOTEL_NAME }}{% endblock %}
+{% block content %}
+<section class="bg-brand-900">
+  <div class="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+    <p class="text-sm font-semibold uppercase tracking-widest text-gold-400">Stay with us</p>
+    <h1 class="mt-2 font-display text-4xl font-semibold text-white">Rooms &amp; suites</h1>
+    <p class="mt-3 max-w-2xl text-brand-100/85">From a smart queen room for a city break to a penthouse with a wraparound terrace.</p>
+  </div>
+</section>
+<section class="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+  <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+    {% for room_type in room_types %}{% include "website/partials/room_card.html" %}{% empty %}<p class="text-slate-500">No rooms to show yet.</p>{% endfor %}
+  </div>
+</section>
+{% endblock %}

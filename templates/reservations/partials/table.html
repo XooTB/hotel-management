@@ -1,0 +1,23 @@
+<div id="results">
+  <div class="overflow-x-auto">
+    <table class="table-base">
+      <thead><tr><th>Reference</th><th>Guest</th><th>Room</th><th>Stay</th><th>Status</th><th>Source</th><th></th></tr></thead>
+      <tbody class="divide-y divide-slate-100 bg-white">
+        {% for r in page %}
+        <tr>
+          <td><a href="{{ r.get_absolute_url }}" class="font-mono font-medium text-brand-700 hover:underline">{{ r.reference }}</a></td>
+          <td><p class="font-medium text-slate-900">{{ r.guest_name }}</p><p class="text-xs text-slate-500">{{ r.guest_email }}</p></td>
+          <td><p>{{ r.room_type.name }}</p><p class="text-xs text-slate-500">{% if r.room %}{{ r.room }}{% else %}Not assigned{% endif %}</p></td>
+          <td><p>{{ r.check_in|date:"j M" }} → {{ r.check_out|date:"j M Y" }}</p><p class="text-xs text-slate-500">{{ r.nights }} night{{ r.nights|pluralize }}</p></td>
+          <td>{% badge r.status r.get_status_display %}</td>
+          <td class="text-slate-500">{{ r.get_source_display }}</td>
+          <td class="text-right"><a href="{{ r.get_absolute_url }}" class="text-slate-400 hover:text-brand-700" aria-label="Open">{% icon 'arrow-right' 'h-4 w-4' %}</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" class="py-12 text-center text-slate-500">No reservations match these filters.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% include "components/pagination.html" %}
+</div>

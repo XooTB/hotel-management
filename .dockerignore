@@ -1,0 +1,13 @@
+.venv
+.git
+.django_tailwind_cli
+__pycache__
+*.pyc
+db.sqlite3
+media
+staticfiles
+static/css
+.env
+docs
+.playwright-mcp
+.github

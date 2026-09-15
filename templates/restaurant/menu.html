@@ -1,0 +1,29 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Menu · {{ HOTEL_NAME }}{% endblock %}
+{% block content %}
+<div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <h1 class="font-display text-3xl font-semibold text-brand-900">Menu</h1>
+    <p class="mt-1 text-sm text-slate-500">Tap an item's availability to take it off (or back on) the menu.</p>
+  </div>
+  <div class="flex gap-2">
+    <a href="{% url 'restaurant:category_create' %}" class="btn-secondary">Add category</a>
+    <a href="{% url 'restaurant:item_create' %}" class="btn-primary">{% icon 'plus' 'h-4 w-4' %} Add item</a>
+  </div>
+</div>
+<div class="grid gap-6 lg:grid-cols-2">
+  {% for category in categories %}
+  <section class="card overflow-hidden">
+    <h2 class="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-5 py-3 text-xs font-semibold uppercase tracking-widest text-slate-600">{{ category.name }} <span class="font-normal normal-case tracking-normal text-slate-400">{{ category.items.all|length }} items</span></h2>
+    <table class="table-base">
+      <tbody class="divide-y divide-slate-100">
+        {% for item in category.items.all %}{% include "restaurant/partials/menu_item_row.html" %}
+        {% empty %}<tr><td class="py-6 text-center text-slate-500">No items yet.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </section>
+  {% empty %}
+  <div class="card p-10 text-center text-slate-500 lg:col-span-2">Start by adding a menu category.</div>
+  {% endfor %}
+</div>
+{% endblock %}

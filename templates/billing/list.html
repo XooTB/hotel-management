@@ -1,0 +1,34 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Billing · {{ HOTEL_NAME }}{% endblock %}
+{% block content %}
+<div class="mb-6">
+  <h1 class="font-display text-3xl font-semibold text-brand-900">Invoices</h1>
+  <p class="mt-1 text-sm text-slate-500">Invoices are raised automatically when a guest checks out.</p>
+</div>
+<div class="mb-4 flex flex-wrap gap-2">
+  <a href="{% url 'billing:list' %}" class="pill {% if not status %}pill-active{% endif %}">All</a>
+  {% for value, label in tabs %}<a href="?status={{ value }}" class="pill {% if status == value %}pill-active{% endif %}">{{ label }}</a>{% endfor %}
+</div>
+<div class="card overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="table-base">
+      <thead><tr><th>Invoice</th><th>Guest</th><th>Stay</th><th>Issued</th><th class="text-right">Total</th><th>Status</th></tr></thead>
+      <tbody class="divide-y divide-slate-100">
+        {% for invoice in page %}
+        <tr>
+          <td><a href="{{ invoice.get_absolute_url }}" class="font-mono font-medium text-brand-700 hover:underline">{{ invoice.number }}</a></td>
+          <td><p class="font-medium text-slate-900">{{ invoice.reservation.guest_name }}</p><p class="font-mono text-xs text-slate-500">{{ invoice.reservation.reference }}</p></td>
+          <td><p>{{ invoice.reservation.room_type.name }}</p><p class="text-xs text-slate-500">{{ invoice.reservation.check_in|date:"j M" }} → {{ invoice.reservation.check_out|date:"j M" }}</p></td>
+          <td>{{ invoice.issued_at|date:"j M Y" }}</td>
+          <td class="text-right font-medium">{{ invoice.total|money }}</td>
+          <td>{% badge invoice.status invoice.get_status_display %}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="py-12 text-center text-slate-500">No invoices yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% include "components/pagination.html" %}
+</div>
+{% endblock %}

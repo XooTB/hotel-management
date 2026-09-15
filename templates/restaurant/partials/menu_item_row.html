@@ -1,0 +1,11 @@
+<tr id="item-{{ item.pk }}" class="{% if not item.is_available %}opacity-60{% endif %}">
+  <td class="whitespace-normal"><p class="font-medium text-slate-900">{{ item.name }}</p>{% if item.description %}<p class="text-xs text-slate-500">{{ item.description }}</p>{% endif %}</td>
+  <td class="text-right font-medium">{{ item.price|money }}</td>
+  <td class="text-right">
+    <button type="button" hx-post="{% url 'restaurant:item_toggle' item.pk %}" hx-target="#item-{{ item.pk }}" hx-swap="outerHTML"
+            class="badge cursor-pointer {% if item.is_available %}bg-emerald-50 text-emerald-700 hover:bg-emerald-100{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200{% endif %}">
+      {% if item.is_available %}Available{% else %}Unavailable{% endif %}
+    </button>
+  </td>
+  <td class="w-10 text-right"><a href="{% url 'restaurant:item_update' item.pk %}" class="text-slate-400 hover:text-brand-700" aria-label="Edit {{ item.name }}">{% icon 'edit' 'h-4 w-4' %}</a></td>
+</tr>

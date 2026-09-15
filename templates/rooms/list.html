@@ -1,0 +1,29 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Rooms · {{ HOTEL_NAME }}{% endblock %}
+{% block content %}
+<div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <h1 class="font-display text-3xl font-semibold text-brand-900">Room board</h1>
+    <p class="mt-1 text-sm text-slate-500">{{ total }} rooms · change a room's status straight from its card.</p>
+  </div>
+  {% if user.is_manager %}<a href="{% url 'rooms:create' %}" class="btn-primary">{% icon 'plus' 'h-4 w-4' %} Add room</a>{% endif %}
+</div>
+
+<div class="mb-6 flex flex-wrap gap-2">
+  <a href="{% url 'rooms:list' %}" class="pill {% if not status %}pill-active{% endif %}">All <span class="opacity-70">{{ total }}</span></a>
+  {% for value, label, count in status_tabs %}
+  <a href="?status={{ value }}" class="pill {% if status == value %}pill-active{% endif %}">{% status_dot value %} {{ label }} <span class="opacity-70">{{ count }}</span></a>
+  {% endfor %}
+</div>
+
+{% for floor, rooms in floors %}
+<section class="mb-8">
+  <h2 class="mb-3 text-xs font-semibold uppercase tracking-widest text-slate-500">Floor {{ floor }}</h2>
+  <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    {% for room in rooms %}{% include "rooms/partials/room_card.html" %}{% endfor %}
+  </div>
+</section>
+{% empty %}
+<div class="card p-10 text-center text-slate-500">No rooms match this filter.</div>
+{% endfor %}
+{% endblock %}

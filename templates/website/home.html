@@ -1,0 +1,69 @@
+{% extends "website/base_public.html" %}
+{% block content %}
+<section class="relative overflow-hidden bg-brand-900">
+  <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(200,155,60,0.35),transparent_55%),radial-gradient(ellipse_at_bottom_left,rgba(47,139,214,0.4),transparent_50%)]"></div>
+  <div class="absolute -right-24 top-24 h-96 w-96 rounded-full border border-white/10"></div>
+  <div class="absolute -right-8 top-40 h-[28rem] w-[28rem] rounded-full border border-white/5"></div>
+  <div class="relative mx-auto max-w-7xl px-4 pb-24 pt-20 sm:px-6 lg:px-8 lg:pb-32 lg:pt-28">
+    <p class="text-sm font-semibold uppercase tracking-[0.25em] text-gold-400">Harbourfront · Est. 1998</p>
+    <h1 class="mt-4 max-w-3xl font-display text-4xl font-semibold leading-tight text-white sm:text-6xl">Where the city lights meet the sea.</h1>
+    <p class="mt-6 max-w-xl text-lg text-brand-100/90">Unhurried mornings, rooms that open onto the water and a table waiting for you downstairs. Book direct and pay when you arrive.</p>
+
+    <form action="{% url 'website:search' %}" method="get" class="mt-10 grid max-w-4xl gap-4 rounded-2xl bg-white p-4 shadow-2xl sm:grid-cols-2 lg:grid-cols-[1fr_1fr_0.6fr_auto] lg:items-end lg:p-5">
+      <div class="form-field"><label for="{{ form.check_in.id_for_label }}">Check-in</label>{{ form.check_in }}</div>
+      <div class="form-field"><label for="{{ form.check_out.id_for_label }}">Check-out</label>{{ form.check_out }}</div>
+      <div class="form-field"><label for="{{ form.guests.id_for_label }}">Guests</label>{{ form.guests }}</div>
+      <button type="submit" class="btn-primary py-2.5">{% icon 'search' 'h-4 w-4' %} Check availability</button>
+    </form>
+  </div>
+</section>
+
+<section class="mx-auto grid max-w-7xl gap-8 px-4 py-16 sm:grid-cols-2 sm:px-6 lg:grid-cols-4 lg:px-8">
+  <div class="flex gap-4"><span class="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-brand-50 text-brand-700">{% icon 'sparkles' %}</span><div><p class="font-semibold text-slate-900">Harbour views</p><p class="mt-1 text-sm text-slate-600">Most rooms look straight out over the marina.</p></div></div>
+  <div class="flex gap-4"><span class="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-brand-50 text-brand-700">{% icon 'utensils' %}</span><div><p class="font-semibold text-slate-900">All-day dining</p><p class="mt-1 text-sm text-slate-600">Restaurant and 24-hour room service.</p></div></div>
+  <div class="flex gap-4"><span class="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-brand-50 text-brand-700">{% icon 'wifi' %}</span><div><p class="font-semibold text-slate-900">Fast, free Wi-Fi</p><p class="mt-1 text-sm text-slate-600">Everywhere, for every device you bring.</p></div></div>
+  <div class="flex gap-4"><span class="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-brand-50 text-brand-700">{% icon 'wallet' %}</span><div><p class="font-semibold text-slate-900">Pay at the hotel</p><p class="mt-1 text-sm text-slate-600">No card needed to book. Settle when you leave.</p></div></div>
+</section>
+
+<section class="bg-slate-50 py-20">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <div>
+        <p class="text-sm font-semibold uppercase tracking-widest text-gold-500">Stay with us</p>
+        <h2 class="mt-2 font-display text-3xl font-semibold text-brand-900 sm:text-4xl">Rooms &amp; suites</h2>
+      </div>
+      <a href="{% url 'website:room_list' %}" class="inline-flex items-center gap-1 text-sm font-medium text-brand-700 hover:text-brand-900">See all rooms {% icon 'arrow-right' 'h-4 w-4' %}</a>
+    </div>
+    <div class="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {% for room_type in room_types %}{% include "website/partials/room_card.html" %}{% empty %}<p class="text-slate-500">Rooms are coming soon.</p>{% endfor %}
+    </div>
+  </div>
+</section>
+
+<section id="dining" class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+  <div class="grid items-center gap-10 overflow-hidden rounded-3xl bg-brand-900 lg:grid-cols-2">
+    <div class="p-8 sm:p-12">
+      <p class="text-sm font-semibold uppercase tracking-widest text-gold-400">The Azure Table</p>
+      <h2 class="mt-2 font-display text-3xl font-semibold text-white">Seasonal plates, harbour sunsets</h2>
+      <p class="mt-4 text-brand-100/85">Breakfast from 6:30, lunch on the terrace and a dinner menu built around the morning's catch. In-house guests can charge everything to their room.</p>
+      <div class="mt-6 flex flex-wrap gap-3 text-sm text-brand-100">
+        <span class="rounded-full border border-white/15 px-3 py-1">Breakfast 6:30–10:30</span>
+        <span class="rounded-full border border-white/15 px-3 py-1">Dinner 18:00–22:30</span>
+        <span class="rounded-full border border-white/15 px-3 py-1">Room service 24h</span>
+      </div>
+    </div>
+    <div class="relative h-64 lg:h-full lg:min-h-80 bg-linear-to-br from-gold-500 via-amber-700 to-rose-900">
+      <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(255,255,255,0.35),transparent_45%)]"></div>
+      <div class="absolute inset-0 grid place-items-center text-white/80">{% icon 'utensils' 'h-20 w-20' %}</div>
+    </div>
+  </div>
+</section>
+
+<section class="border-t border-slate-200 bg-white">
+  <div class="mx-auto flex max-w-7xl flex-col items-center gap-4 px-4 py-14 text-center sm:px-6 lg:px-8">
+    <h2 class="font-display text-2xl font-semibold text-brand-900">Already booked?</h2>
+    <p class="text-slate-600">Look up your reservation with your booking reference and email.</p>
+    <a href="{% url 'website:lookup' %}" class="btn-secondary">Manage my booking</a>
+  </div>
+</section>
+{% endblock %}

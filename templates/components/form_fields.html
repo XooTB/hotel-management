@@ -1,0 +1,28 @@
+{% if form.non_field_errors %}
+<div class="mb-4 rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
+  {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+</div>
+{% endif %}
+{% for field in form.hidden_fields %}{{ field }}{% for error in field.errors %}<p class="text-xs text-rose-600">{{ field.label }}: {{ error }}</p>{% endfor %}{% endfor %}
+<div class="grid gap-4 {{ grid|default:'sm:grid-cols-2' }}">
+  {% for field in form.visible_fields %}
+    {% if field.widget_type == 'checkbox' %}
+    <div class="form-field sm:col-span-2">
+      <label class="flex items-center gap-2 font-normal">{{ field }} <span class="font-medium">{{ field.label }}</span></label>
+      {% if field.help_text %}<p class="helptext">{{ field.help_text }}</p>{% endif %}
+      {{ field.errors }}
+    </div>
+    {% else %}
+    <div class="form-field {% if field.widget_type == 'textarea' or field.widget_type == 'checkboxselectmultiple' or field.widget_type == 'clearablefile' %}sm:col-span-2{% endif %}">
+      <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span class="text-rose-500">*</span>{% endif %}</label>
+      {% if field.widget_type == 'checkboxselectmultiple' %}
+        <div class="grid grid-cols-2 gap-2 rounded-lg border border-slate-200 p-3 sm:grid-cols-3 [&_label]:flex [&_label]:items-center [&_label]:gap-2 [&_label]:font-normal">{{ field }}</div>
+      {% else %}
+        {{ field }}
+      {% endif %}
+      {% if field.help_text %}<p class="helptext">{{ field.help_text }}</p>{% endif %}
+      {{ field.errors }}
+    </div>
+    {% endif %}
+  {% endfor %}
+</div>

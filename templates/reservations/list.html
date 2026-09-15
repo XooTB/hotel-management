@@ -1,0 +1,31 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Reservations · {{ HOTEL_NAME }}{% endblock %}
+{% block content %}
+<div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <h1 class="font-display text-3xl font-semibold text-brand-900">Reservations</h1>
+    <p class="mt-1 text-sm text-slate-500">Search bookings, check guests in and out.</p>
+  </div>
+  <a href="{% url 'reservations:create' %}" class="btn-primary">{% icon 'plus' 'h-4 w-4' %} New reservation</a>
+</div>
+
+<div class="mb-4 flex flex-wrap gap-2">
+  <a href="{% url 'reservations:list' %}" class="pill {% if not view %}pill-active{% endif %}">All</a>
+  {% for key, label in quick_views %}
+  <a href="?view={{ key }}" class="pill {% if view == key %}pill-active{% endif %}">{{ label }}</a>
+  {% endfor %}
+</div>
+
+<div class="card overflow-hidden">
+  <form method="get" hx-get="{% url 'reservations:list' %}" hx-target="#results" hx-swap="outerHTML" hx-push-url="true"
+        hx-trigger="input changed delay:300ms from:#id_q, change from:#id_status, change from:#id_date, submit"
+        class="flex flex-wrap items-center gap-3 border-b border-slate-200 p-4">
+    {% if view %}<input type="hidden" name="view" value="{{ view }}">{% endif %}
+    <div class="form-field min-w-56 flex-1"><label for="id_q" class="sr-only">Search</label>{{ form.q }}</div>
+    <div class="form-field w-44"><label for="id_status" class="sr-only">Status</label>{{ form.status }}</div>
+    <div class="form-field w-44"><label for="id_date" class="sr-only">Staying on</label>{{ form.date }}</div>
+    <button type="submit" class="btn-secondary">{% icon 'search' 'h-4 w-4' %} Filter</button>
+  </form>
+  {% include "reservations/partials/table.html" %}
+</div>
+{% endblock %}

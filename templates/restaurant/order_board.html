@@ -1,0 +1,17 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Restaurant · {{ HOTEL_NAME }}{% endblock %}
+{% block content %}
+<div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <h1 class="font-display text-3xl font-semibold text-brand-900">Order board</h1>
+    <p class="mt-1 text-sm text-slate-500">Refreshes every 20 seconds.</p>
+  </div>
+  <div class="flex flex-wrap gap-2">
+    <a href="{% url 'restaurant:order_create' %}?type=room_service" class="btn-secondary">{% icon 'door' 'h-4 w-4' %} Room service</a>
+    <a href="{% url 'restaurant:order_create' %}?type=dine_in" class="btn-primary">{% icon 'plus' 'h-4 w-4' %} Dine-in order</a>
+  </div>
+</div>
+<div id="board" hx-get="{% url 'restaurant:order_list' %}" hx-trigger="every 20s" hx-swap="innerHTML">
+  {% include "restaurant/partials/board.html" %}
+</div>
+{% endblock %}

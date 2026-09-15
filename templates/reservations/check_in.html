@@ -1,0 +1,38 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Check in {{ reservation.reference }} · {{ HOTEL_NAME }}{% endblock %}
+{% block content %}
+<div class="mx-auto max-w-3xl">
+  <a href="{{ reservation.get_absolute_url }}" class="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-brand-700">{% icon 'arrow-left' 'h-4 w-4' %} {{ reservation.reference }}</a>
+  <h1 class="mt-2 font-display text-3xl font-semibold text-brand-900">Check in {{ reservation.guest_name }}</h1>
+  <p class="mt-1 text-sm text-slate-500">{{ reservation.room_type.name }} · {{ reservation.check_in|date:"j M" }} → {{ reservation.check_out|date:"j M Y" }} · {{ reservation.nights }} night{{ reservation.nights|pluralize }} · {{ reservation.guests }} guest{{ reservation.guests|pluralize }}</p>
+
+  <form method="post" class="card mt-6 space-y-5 p-6">
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="rounded-lg bg-rose-50 p-3 text-sm text-rose-700">{{ form.non_field_errors|join:" " }}</div>{% endif %}
+    {{ form.room.errors }}
+    {% with rooms=form.fields.room.queryset %}
+    {% if rooms %}
+      <p class="text-sm font-medium text-slate-700">Choose a clean room</p>
+      <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {% for room in rooms %}
+        <label class="cursor-pointer rounded-xl border border-slate-200 p-4 text-center transition hover:border-brand-500 has-checked:border-brand-600 has-checked:bg-brand-50 has-checked:ring-2 has-checked:ring-brand-500/30">
+          <input type="radio" name="room" value="{{ room.pk }}" class="sr-only" {% if forloop.first %}checked{% endif %} required>
+          <p class="text-2xl font-semibold text-slate-900">{{ room.number }}</p>
+          <p class="text-xs text-slate-500">Floor {{ room.floor }}</p>
+        </label>
+        {% endfor %}
+      </div>
+      <div class="flex justify-end gap-3 border-t border-slate-200 pt-5">
+        <a href="{{ reservation.get_absolute_url }}" class="btn-secondary">Cancel</a>
+        <button type="submit" class="btn-primary">{% icon 'check' 'h-4 w-4' %} Confirm check-in</button>
+      </div>
+    {% else %}
+      <div class="rounded-lg bg-amber-50 p-4 text-sm text-amber-900">
+        No clean {{ reservation.room_type.name }} rooms are free right now.
+        <a href="{% url 'rooms:list' %}?status=cleaning" class="font-medium underline">Check the room board</a> for rooms waiting on housekeeping.
+      </div>
+    {% endif %}
+    {% endwith %}
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,20 @@
+# One service, one container: the app and its PostgreSQL database run together.
+services:
+  hotel:
+    build: .
+    image: hotel-management:latest
+    ports:
+      - "${HOTEL_PORT:-8000}:8000"   # HOTEL_PORT=8080 docker compose up  if 8000 is taken
+    environment:
+      DEMO_DATA: "1"                 # load demo rooms, staff and bookings on first start
+      TIME_ZONE: "UTC"
+      # DJANGO_CSRF_TRUSTED_ORIGINS: "https://hotel.example.com"
+      # DJANGO_SUPERUSER_USERNAME: "owner"
+      # DJANGO_SUPERUSER_PASSWORD: "change-me"
+      # DJANGO_SUPERUSER_EMAIL: "owner@example.com"
+    volumes:
+      - hotel-data:/var/lib/hotel    # database, uploads and generated secret key
+    restart: unless-stopped
+
+volumes:
+  hotel-data:

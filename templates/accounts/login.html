@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Staff sign in · {{ HOTEL_NAME }}{% endblock %}
+{% block body %}
+<div class="grid min-h-screen lg:grid-cols-2">
+  <div class="relative hidden overflow-hidden bg-brand-900 lg:block">
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(200,155,60,0.35),transparent_55%),radial-gradient(ellipse_at_bottom_right,rgba(47,139,214,0.4),transparent_55%)]"></div>
+    <div class="relative flex h-full flex-col justify-between p-12">
+      <a href="{% url 'website:home' %}" class="flex items-center gap-2.5 text-white">
+        <span class="grid h-9 w-9 place-items-center rounded-full bg-white/10 text-gold-400">{% icon 'star' 'h-4 w-4' %}</span>
+        <span class="font-display text-xl font-semibold">{{ HOTEL_NAME }}</span>
+      </a>
+      <div>
+        <h1 class="font-display text-4xl font-semibold leading-tight text-white">Hotel operations,<br>all in one place.</h1>
+        <p class="mt-4 max-w-md text-brand-100/85">Reservations, rooms, housekeeping, restaurant orders, billing and shift schedules for the whole team.</p>
+      </div>
+      <p class="text-xs text-brand-100/60">Staff access only</p>
+    </div>
+  </div>
+  <div class="flex items-center justify-center bg-slate-50 px-4 py-12">
+    <div class="w-full max-w-sm">
+      <h2 class="font-display text-3xl font-semibold text-brand-900">Sign in</h2>
+      <p class="mt-2 text-sm text-slate-600">Use the account your manager created for you.</p>
+      <form method="post" class="mt-8 space-y-5">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next }}">
+        {% include "components/form_fields.html" with grid="grid-cols-1" %}
+        <button type="submit" class="btn-primary w-full py-2.5">Sign in</button>
+      </form>
+      <a href="{% url 'website:home' %}" class="mt-6 inline-flex items-center gap-1 text-sm text-slate-500 hover:text-brand-700">{% icon 'arrow-left' 'h-4 w-4' %} Back to website</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

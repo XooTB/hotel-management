@@ -1,0 +1,10 @@
+{% if room_type.image %}
+<img src="{{ room_type.image.url }}" alt="{{ room_type.name }}" class="{{ css }} w-full object-cover">
+{% else %}
+<div class="{{ css }} relative flex w-full items-end overflow-hidden bg-linear-to-br {{ room_type.placeholder_gradient }} p-5">
+  <div class="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.35),transparent_40%),radial-gradient(circle_at_85%_10%,rgba(255,255,255,0.2),transparent_35%)]"></div>
+  <div class="absolute -bottom-10 -right-10 h-40 w-40 rounded-full border border-white/20"></div>
+  <div class="absolute -bottom-16 -right-4 h-56 w-56 rounded-full border border-white/10"></div>
+  <span class="relative flex items-center gap-2 text-sm font-medium text-white/90">{% icon 'bed' 'h-6 w-6' %} {{ room_type.bed_type }}</span>
+</div>
+{% endif %}

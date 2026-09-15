@@ -1,0 +1,26 @@
+{% extends "website/base_public.html" %}
+{% block title %}Booking {{ reservation.reference }} · {{ HOTEL_NAME }}{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-3xl px-4 py-14 sm:px-6">
+  <div class="flex flex-wrap items-center justify-between gap-4">
+    <div>
+      <p class="text-sm text-slate-500">Booking reference</p>
+      <h1 class="font-mono text-3xl font-semibold tracking-widest text-brand-900">{{ reservation.reference }}</h1>
+    </div>
+    {% badge reservation.status reservation.get_status_display %}
+  </div>
+  <div class="card mt-8 p-6">{% include "website/partials/booking_summary.html" %}</div>
+
+  {% if reservation.can_cancel %}
+  <div class="card mt-6 flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+    <div><p class="font-semibold text-slate-900">Change of plans?</p><p class="text-sm text-slate-600">You can cancel free of charge until your arrival date.</p></div>
+    <form method="post" action="{% url 'website:cancel' reservation.reference %}" onsubmit="return confirm('Cancel this booking? This cannot be undone.')">
+      {% csrf_token %}<button type="submit" class="btn-danger">Cancel booking</button>
+    </form>
+  </div>
+  {% elif reservation.status == 'cancelled' %}
+  <p class="mt-6 rounded-lg bg-slate-100 p-4 text-sm text-slate-700">This booking was cancelled{% if reservation.cancelled_at %} on {{ reservation.cancelled_at|date:"j F Y" }}{% endif %}. We hope to welcome you another time.</p>
+  {% endif %}
+  <p class="mt-8 text-center text-sm text-slate-500">Need to change dates? Call us on +1 (555) 010-2040 and quote your reference.</p>
+</section>
+{% endblock %}

@@ -1,0 +1,73 @@
+# Runs on every push and pull request so the repository always has a working build.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  tests:
+    name: Tests (PostgreSQL)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: hotel
+          POSTGRES_PASSWORD: hotel
+          POSTGRES_DB: hotel
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U hotel"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgres://hotel:hotel@localhost:5432/hotel
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+      - name: Install dependencies
+        run: uv sync --frozen
+      - name: Check for missing migrations
+        run: uv run python manage.py makemigrations --check --dry-run
+      - name: Run test suite
+        run: uv run python manage.py test
+
+  container:
+    name: Container build & smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build and start
+        run: docker compose up -d --build
+
+      - name: Wait until healthy
+        run: scripts/wait-healthy.sh
+
+      - name: Smoke test pages
+        run: |
+          set -e
+          curl -fsS http://localhost:8000/ | grep -q "Grand Azure"
+          curl -fsS http://localhost:8000/rooms/ | grep -q "Deluxe King"
+          curl -fsS -o /dev/null http://localhost:8000/accounts/login/
+          css=$(curl -fsS http://localhost:8000/ | grep -o '/static/css/app[^"]*\.css' | head -1)
+          test -n "$css" && curl -fsS -o /dev/null "http://localhost:8000$css"
+          echo "Pages and static files OK"
+
+      - name: Data survives a restart
+        run: |
+          set -e
+          docker compose restart
+          scripts/wait-healthy.sh
+          docker compose logs hotel | grep -q "Demo data already present"
+          docker compose logs hotel | grep -q "Stopping services"
+
+      - name: Container logs
+        if: always()
+        run: docker compose logs
+
+      - name: Clean up
+        if: always()
+        run: docker compose down -v

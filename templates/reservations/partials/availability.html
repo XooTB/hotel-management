@@ -1,0 +1,16 @@
+{% if results is None %}
+  <div class="rounded-lg bg-rose-50 p-3 text-sm text-rose-700">
+    {% for field, errors in stay.errors.items %}{% for error in errors %}<p>{{ error }}</p>{% endfor %}{% endfor %}
+  </div>
+{% else %}
+  <ul class="divide-y divide-slate-100 text-sm">
+    {% for rt in results %}
+    <li class="flex items-center justify-between gap-3 py-2.5">
+      <div><p class="font-medium text-slate-900">{{ rt.name }}</p><p class="text-xs text-slate-500">{{ rt.nightly_rate|money }} · sleeps {{ rt.capacity }}</p></div>
+      {% if rt.available %}<span class="badge bg-emerald-50 text-emerald-700">{{ rt.available }} free</span>{% else %}<span class="badge bg-rose-50 text-rose-700">Full</span>{% endif %}
+    </li>
+    {% empty %}
+    <li class="py-3 text-slate-500">No active room types.</li>
+    {% endfor %}
+  </ul>
+{% endif %}

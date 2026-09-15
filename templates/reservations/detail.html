@@ -1,0 +1,112 @@
+{% extends "dashboard/base.html" %}
+{% block title %}{{ reservation.reference }} · {{ HOTEL_NAME }}{% endblock %}
+{% block content %}
+<a href="{% url 'reservations:list' %}" class="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-brand-700">{% icon 'arrow-left' 'h-4 w-4' %} Reservations</a>
+<div class="mt-2 flex flex-wrap items-start justify-between gap-4">
+  <div>
+    <div class="flex flex-wrap items-center gap-3">
+      <h1 class="font-mono text-3xl font-semibold tracking-wider text-brand-900">{{ reservation.reference }}</h1>
+      {% badge reservation.status reservation.get_status_display %}
+    </div>
+    <p class="mt-1 text-sm text-slate-500">{{ reservation.get_source_display }} booking · created {{ reservation.created_at|date:"j M Y, H:i" }}{% if reservation.created_by %} by {{ reservation.created_by }}{% endif %}</p>
+  </div>
+  <div class="flex flex-wrap gap-2">
+    {% if reservation.can_check_in %}
+      <a href="{% url 'reservations:check_in' reservation.reference %}" class="btn-primary">{% icon 'log-in' 'h-4 w-4' %} Check in</a>
+    {% endif %}
+    {% if reservation.can_check_out %}
+      <a href="{% url 'restaurant:order_create' %}?type=room_service&reservation={{ reservation.pk }}" class="btn-secondary">{% icon 'utensils' 'h-4 w-4' %} Add order</a>
+      <form method="post" action="{% url 'reservations:check_out' reservation.reference %}" onsubmit="return confirm('Check out this guest and create the invoice?')">
+        {% csrf_token %}<button type="submit" class="btn-primary">{% icon 'logout' 'h-4 w-4' %} Check out</button>
+      </form>
+    {% endif %}
+    {% if reservation.can_mark_no_show %}
+      <form method="post" action="{% url 'reservations:no_show' reservation.reference %}" onsubmit="return confirm('Mark this reservation as a no-show?')">
+        {% csrf_token %}<button type="submit" class="btn-secondary">No-show</button>
+      </form>
+    {% endif %}
+    {% if reservation.status == 'confirmed' %}
+      <form method="post" action="{% url 'reservations:cancel' reservation.reference %}" onsubmit="return confirm('Cancel this reservation?')">
+        {% csrf_token %}<button type="submit" class="btn-secondary text-rose-600">Cancel booking</button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+
+<div class="mt-6 grid gap-6 lg:grid-cols-3">
+  <div class="space-y-6 lg:col-span-2">
+    <section class="card p-6">
+      <h2 class="font-semibold text-slate-900">Stay</h2>
+      <dl class="mt-4 grid gap-5 text-sm sm:grid-cols-3">
+        <div><dt class="text-xs uppercase tracking-wide text-slate-500">Check-in</dt><dd class="mt-1 font-medium text-slate-900">{{ reservation.check_in|date:"D j M Y" }}</dd></div>
+        <div><dt class="text-xs uppercase tracking-wide text-slate-500">Check-out</dt><dd class="mt-1 font-medium text-slate-900">{{ reservation.check_out|date:"D j M Y" }}</dd></div>
+        <div><dt class="text-xs uppercase tracking-wide text-slate-500">Nights</dt><dd class="mt-1 font-medium text-slate-900">{{ reservation.nights }}</dd></div>
+        <div><dt class="text-xs uppercase tracking-wide text-slate-500">Room type</dt><dd class="mt-1 font-medium text-slate-900">{{ reservation.room_type.name }}</dd></div>
+        <div><dt class="text-xs uppercase tracking-wide text-slate-500">Room</dt><dd class="mt-1 font-medium text-slate-900">{% if reservation.room %}{{ reservation.room }}{% else %}<span class="text-slate-500">Assigned at check-in</span>{% endif %}</dd></div>
+        <div><dt class="text-xs uppercase tracking-wide text-slate-500">Guests</dt><dd class="mt-1 font-medium text-slate-900">{{ reservation.adults }} adult{{ reservation.adults|pluralize }}{% if reservation.children %}, {{ reservation.children }} child{{ reservation.children|pluralize:"ren" }}{% endif %}</dd></div>
+        <div><dt class="text-xs uppercase tracking-wide text-slate-500">Nightly rate</dt><dd class="mt-1 font-medium text-slate-900">{{ reservation.nightly_rate|money }}</dd></div>
+        <div><dt class="text-xs uppercase tracking-wide text-slate-500">Room total</dt><dd class="mt-1 font-medium text-slate-900">{{ reservation.room_total|money }}</dd></div>
+      </dl>
+      {% if reservation.special_requests %}
+      <div class="mt-5 rounded-lg bg-amber-50 p-3 text-sm text-amber-900"><p class="font-medium">Special requests</p><p class="mt-1">{{ reservation.special_requests|linebreaksbr }}</p></div>
+      {% endif %}
+    </section>
+
+    <section class="card overflow-hidden">
+      <div class="border-b border-slate-200 px-6 py-4"><h2 class="font-semibold text-slate-900">Restaurant orders</h2></div>
+      {% if orders %}
+      <div class="overflow-x-auto">
+        <table class="table-base">
+          <thead><tr><th>Order</th><th>Date</th><th>Items</th><th>Status</th><th class="text-right">Total</th></tr></thead>
+          <tbody class="divide-y divide-slate-100">
+            {% for order in orders %}
+            <tr>
+              <td><p class="font-medium">#{{ order.pk }}</p><p class="text-xs text-slate-500">{{ order.get_order_type_display }}{% if order.charge_to_room %} · charged to room{% endif %}</p></td>
+              <td>{{ order.created_at|date:"j M, H:i" }}</td>
+              <td class="whitespace-normal">{% for item in order.items.all %}{{ item.quantity }}× {{ item.menu_item.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+              <td>{% badge order.status order.get_status_display %}</td>
+              <td class="text-right font-medium">{{ order.total|money }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="px-6 py-8 text-center text-sm text-slate-500">No restaurant orders for this stay.</p>
+      {% endif %}
+    </section>
+  </div>
+
+  <div class="space-y-6">
+    <section class="card p-6 text-sm">
+      <h2 class="font-semibold text-slate-900">Guest</h2>
+      <p class="mt-3 text-base font-medium text-slate-900">{{ reservation.guest_name }}</p>
+      <p class="mt-2 flex items-center gap-2 text-slate-600">{% icon 'mail' 'h-4 w-4' %} <a href="mailto:{{ reservation.guest_email }}" class="hover:underline">{{ reservation.guest_email }}</a></p>
+      <p class="mt-1 flex items-center gap-2 text-slate-600">{% icon 'phone' 'h-4 w-4' %} {{ reservation.guest_phone }}</p>
+    </section>
+
+    <section class="card p-6 text-sm">
+      <h2 class="font-semibold text-slate-900">Timeline</h2>
+      <ol class="mt-4 space-y-3 border-l border-slate-200 pl-4">
+        <li><p class="font-medium text-slate-900">Booked</p><p class="text-xs text-slate-500">{{ reservation.created_at|date:"j M Y, H:i" }}</p></li>
+        {% if reservation.checked_in_at %}<li><p class="font-medium text-slate-900">Checked in</p><p class="text-xs text-slate-500">{{ reservation.checked_in_at|date:"j M Y, H:i" }}</p></li>{% endif %}
+        {% if reservation.checked_out_at %}<li><p class="font-medium text-slate-900">Checked out</p><p class="text-xs text-slate-500">{{ reservation.checked_out_at|date:"j M Y, H:i" }}</p></li>{% endif %}
+        {% if reservation.cancelled_at %}<li><p class="font-medium text-rose-700">Cancelled</p><p class="text-xs text-slate-500">{{ reservation.cancelled_at|date:"j M Y, H:i" }}</p></li>{% endif %}
+      </ol>
+    </section>
+
+    <section class="card p-6 text-sm">
+      <h2 class="font-semibold text-slate-900">Invoice</h2>
+      {% if invoice %}
+      <div class="mt-3 flex items-center justify-between">
+        <a href="{{ invoice.get_absolute_url }}" class="font-mono font-medium text-brand-700 hover:underline">{{ invoice.number }}</a>
+        {% badge invoice.status invoice.get_status_display %}
+      </div>
+      <p class="mt-2 text-2xl font-semibold text-slate-900">{{ invoice.total|money }}</p>
+      {% else %}
+      <p class="mt-3 text-slate-500">The invoice is created automatically at check-out.</p>
+      {% endif %}
+    </section>
+  </div>
+</div>
+{% endblock %}

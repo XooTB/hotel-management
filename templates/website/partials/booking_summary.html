@@ -1,0 +1,9 @@
+<dl class="grid gap-x-6 gap-y-4 text-sm sm:grid-cols-2">
+  <div><dt class="text-xs uppercase tracking-wide text-slate-500">Room</dt><dd class="mt-1 font-medium text-slate-900">{{ reservation.room_type.name }}</dd></div>
+  <div><dt class="text-xs uppercase tracking-wide text-slate-500">Guests</dt><dd class="mt-1 font-medium text-slate-900">{{ reservation.adults }} adult{{ reservation.adults|pluralize }}{% if reservation.children %}, {{ reservation.children }} child{{ reservation.children|pluralize:"ren" }}{% endif %}</dd></div>
+  <div><dt class="text-xs uppercase tracking-wide text-slate-500">Check-in</dt><dd class="mt-1 font-medium text-slate-900">{{ reservation.check_in|date:"l, j F Y" }}</dd><dd class="text-xs text-slate-500">from {{ CHECK_IN_TIME }}</dd></div>
+  <div><dt class="text-xs uppercase tracking-wide text-slate-500">Check-out</dt><dd class="mt-1 font-medium text-slate-900">{{ reservation.check_out|date:"l, j F Y" }}</dd><dd class="text-xs text-slate-500">by {{ CHECK_OUT_TIME }}</dd></div>
+  <div><dt class="text-xs uppercase tracking-wide text-slate-500">Guest</dt><dd class="mt-1 font-medium text-slate-900">{{ reservation.guest_name }}</dd><dd class="text-xs text-slate-500">{{ reservation.guest_email }} · {{ reservation.guest_phone }}</dd></div>
+  <div><dt class="text-xs uppercase tracking-wide text-slate-500">Room total ({{ reservation.nights }} night{{ reservation.nights|pluralize }})</dt><dd class="mt-1 font-medium text-slate-900">{{ reservation.room_total|money }}</dd><dd class="text-xs text-slate-500">pay at the hotel · taxes added at check-out</dd></div>
+  {% if reservation.special_requests %}<div class="sm:col-span-2"><dt class="text-xs uppercase tracking-wide text-slate-500">Special requests</dt><dd class="mt-1 text-slate-700">{{ reservation.special_requests|linebreaksbr }}</dd></div>{% endif %}
+</dl>

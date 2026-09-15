@@ -1,0 +1,32 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Room types · {{ HOTEL_NAME }}{% endblock %}
+{% block content %}
+<div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <h1 class="font-display text-3xl font-semibold text-brand-900">Room types</h1>
+    <p class="mt-1 text-sm text-slate-500">What guests can book on the website, and at what rate.</p>
+  </div>
+  <a href="{% url 'rooms:type_create' %}" class="btn-primary">{% icon 'plus' 'h-4 w-4' %} Add room type</a>
+</div>
+<div class="card overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="table-base">
+      <thead><tr><th>Room type</th><th class="text-right">Nightly rate</th><th class="text-right">Sleeps</th><th class="text-right">Rooms</th><th>Website</th><th></th></tr></thead>
+      <tbody class="divide-y divide-slate-100">
+        {% for rt in room_types %}
+        <tr>
+          <td><p class="font-medium text-slate-900">{{ rt.name }}</p><p class="max-w-md truncate text-xs text-slate-500">{{ rt.short_description }}</p></td>
+          <td class="text-right font-medium">{{ rt.nightly_rate|money }}</td>
+          <td class="text-right">{{ rt.capacity }}</td>
+          <td class="text-right">{{ rt.room_count }}</td>
+          <td>{% if rt.is_active %}<span class="badge bg-emerald-50 text-emerald-700">Visible</span>{% else %}<span class="badge bg-slate-100 text-slate-600">Hidden</span>{% endif %}</td>
+          <td class="text-right"><a href="{% url 'rooms:type_update' rt.pk %}" class="text-slate-400 hover:text-brand-700" aria-label="Edit">{% icon 'edit' 'h-4 w-4' %}</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="py-12 text-center text-slate-500">No room types yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

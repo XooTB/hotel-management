@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block body_class %}bg-slate-50 text-slate-800{% endblock %}
+{% block body %}
+{% include "components/messages.html" %}
+<div x-data="{ sidebar: false }">
+  <div x-show="sidebar" x-cloak x-transition.opacity class="fixed inset-0 z-40 bg-slate-900/50 lg:hidden" @click="sidebar = false"></div>
+
+  <aside :class="{ 'max-lg:translate-x-0': sidebar }"
+         class="fixed inset-y-0 left-0 z-50 flex w-64 max-lg:-translate-x-full flex-col bg-brand-900 text-brand-100 transition-transform print:hidden">
+    <a href="{% url 'dashboard:home' %}" class="flex h-16 items-center gap-2.5 border-b border-white/10 px-6">
+      <span class="grid h-8 w-8 place-items-center rounded-full bg-white/10 text-gold-400">{% icon 'star' 'h-4 w-4' %}</span>
+      <span class="font-display text-lg font-semibold text-white">{{ HOTEL_NAME }}</span>
+    </a>
+    <nav class="flex-1 space-y-1 overflow-y-auto px-3 py-4">
+      {% for item in nav_items %}
+      <a href="{{ item.url }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition {% if item.active %}bg-white/10 text-white{% else %}text-brand-100/75 hover:bg-white/5 hover:text-white{% endif %}">
+        <span class="{% if item.active %}text-gold-400{% endif %}">{% icon item.icon 'h-5 w-5' %}</span>{{ item.label }}
+      </a>
+      {% endfor %}
+    </nav>
+    <div class="border-t border-white/10 p-4">
+      <div class="flex items-center gap-3">
+        {% firstof user.first_name user.username as display_name %}
+        <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gold-500 text-sm font-semibold text-white">{{ display_name|first|upper }}</span>
+        <div class="min-w-0 flex-1">
+          <p class="truncate text-sm font-medium text-white">{{ user }}</p>
+          <p class="text-xs text-brand-100/70">{% if user.is_superuser %}Administrator{% else %}{{ user.get_role_display }}{% endif %}</p>
+        </div>
+        <form method="post" action="{% url 'accounts:logout' %}">
+          {% csrf_token %}
+          <button type="submit" class="rounded-lg p-2 text-brand-100/70 hover:bg-white/10 hover:text-white" title="Sign out" aria-label="Sign out">{% icon 'logout' 'h-5 w-5' %}</button>
+        </form>
+      </div>
+    </div>
+  </aside>
+
+  <div class="lg:pl-64 print:pl-0">
+    <header class="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-slate-200 bg-white/90 px-4 backdrop-blur sm:px-6 lg:px-8 print:hidden">
+      <button type="button" class="-ml-2 p-2 text-slate-600 lg:hidden" @click="sidebar = true" aria-label="Open menu">{% icon 'menu' %}</button>
+      <p class="text-sm text-slate-500">{% now "l, j F Y" %}</p>
+      <a href="{% url 'website:home' %}" target="_blank" class="ml-auto text-sm text-slate-500 hover:text-brand-700">View website ↗</a>
+    </header>
+    <main class="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8 print:max-w-none print:p-0">{% block content %}{% endblock %}</main>
+  </div>
+</div>
+{% endblock %}
