@@ -75,7 +75,7 @@ if [ -n "${DJANGO_SUPERUSER_USERNAME:-}" ]; then
 fi
 
 echo "==> Starting Gunicorn on 0.0.0.0:8000"
-setpriv --reuid=app --regid=app --init-groups \
+HOME=/home/app setpriv --reuid=app --regid=app --init-groups \
   gunicorn config.wsgi:application \
     --bind 0.0.0.0:8000 \
     --workers "${GUNICORN_WORKERS:-3}" \

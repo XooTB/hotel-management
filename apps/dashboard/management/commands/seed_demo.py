@@ -136,7 +136,7 @@ class Command(BaseCommand):
         staff = {}
         for username, first, last, role, superuser in STAFF:
             user = User(username=username, first_name=first, last_name=last, role=role,
-                        email=f"{username}@grandazure.local", is_staff=superuser, is_superuser=superuser)
+                        email=f"{username}@grandazure.local", is_superuser=superuser)
             user.set_password(PASSWORD)
             user.save()
             staff[username] = user

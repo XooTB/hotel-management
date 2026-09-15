@@ -1,0 +1,55 @@
+{# Tailwind CSS v4 browser build: compiles utility classes in the browser, no build step. #}
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.3/dist/index.global.js" integrity="sha384-2ql948lIdLcGEE0/qxNiudyTjgauA3RDJERu5xW75kFCvSl5a9odyQYCb6tEjnmB" crossorigin="anonymous"></script>
+<style type="text/tailwindcss">
+    @theme {
+      --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+      --font-display: "Playfair Display", ui-serif, Georgia, serif;
+      --color-brand-50: #eff8ff;
+      --color-brand-100: #dbeefe;
+      --color-brand-200: #bfe2fe;
+      --color-brand-500: #2f8bd6;
+      --color-brand-600: #1f6fb8;
+      --color-brand-700: #1b5a95;
+      --color-brand-800: #1b4b7a;
+      --color-brand-900: #173d63;
+      --color-gold-400: #d8b46a;
+      --color-gold-500: #c89b3c;
+    }
+
+    [x-cloak] { display: none !important; }
+
+    /* Utilities (not layer classes) so the button variants below can @apply them. */
+    @utility btn {
+      @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+    }
+
+    @layer components {
+      .btn-primary { @apply btn bg-brand-700 text-white hover:bg-brand-800; }
+      .btn-gold { @apply btn bg-gold-500 text-white hover:bg-gold-400; }
+      .btn-secondary { @apply btn border border-slate-300 bg-white text-slate-700 hover:bg-slate-50; }
+      .btn-danger { @apply btn bg-red-600 text-white hover:bg-red-700; }
+      .btn-sm { @apply px-3 py-1.5 text-xs; }
+      .card { @apply rounded-xl border border-slate-200 bg-white shadow-sm; }
+      .badge { @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium; }
+      .table-base { @apply min-w-full divide-y divide-slate-200 text-sm; }
+      .table-base th { @apply bg-slate-50 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500; }
+      .table-base td { @apply px-4 py-3 text-slate-700 whitespace-nowrap; }
+      .table-base tbody tr { @apply hover:bg-slate-50; }
+
+      .form-field { @apply space-y-1; }
+      .form-field label { @apply block text-sm font-medium text-slate-700; }
+      .form-field input:not([type=checkbox]):not([type=radio]),
+      .form-field select,
+      .form-field textarea,
+      .input { @apply block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30 focus:outline-none; }
+      .form-field select[multiple] { @apply min-h-32; }
+      .form-field input[type=checkbox] { @apply h-4 w-4 rounded border-slate-300 text-brand-600; }
+      .form-field .helptext { @apply text-xs text-slate-500; }
+      .form-field .errorlist, .errorlist { @apply text-xs text-red-600; }
+    }
+
+    @layer components {
+      .pill { @apply inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600 transition hover:bg-slate-50; }
+      .pill-active { @apply border-brand-900 bg-brand-900 text-white hover:bg-brand-800; }
+    }
+</style>

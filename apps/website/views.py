@@ -6,6 +6,7 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 
+from apps.htmx import is_htmx
 from apps.reservations import services
 from apps.reservations.models import Reservation
 from apps.rooms.models import RoomType
@@ -65,7 +66,7 @@ def room_detail(request, slug):
         data = form.cleaned_data
         available = services.available_count(room_type, data["check_in"], data["check_out"])
     context = {"room_type": room_type, "form": form, "available": available}
-    template = "website/partials/room_availability.html" if request.htmx else "website/room_detail.html"
+    template = "website/partials/room_availability.html" if is_htmx(request) else "website/room_detail.html"
     return render(request, template, context)
 
 
@@ -76,7 +77,7 @@ def search(request):
         data = form.cleaned_data
         nights = (data["check_out"] - data["check_in"]).days
         results = services.search_availability(data["check_in"], data["check_out"], data["guests"])
-    template = "website/partials/search_results.html" if request.htmx else "website/search.html"
+    template = "website/partials/search_results.html" if is_htmx(request) else "website/search.html"
     return render(request, template, {"form": form, "results": results, "nights": nights})
 
 

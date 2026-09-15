@@ -52,9 +52,8 @@ jobs:
           curl -fsS http://localhost:8000/ | grep -q "Grand Azure"
           curl -fsS http://localhost:8000/rooms/ | grep -q "Deluxe King"
           curl -fsS -o /dev/null http://localhost:8000/accounts/login/
-          css=$(curl -fsS http://localhost:8000/ | grep -o '/static/css/app[^"]*\.css' | head -1)
-          test -n "$css" && curl -fsS -o /dev/null "http://localhost:8000$css"
-          echo "Pages and static files OK"
+          curl -fsS http://localhost:8000/ | grep -q "cdn.jsdelivr.net/npm/htmx.org@"
+          echo "Pages OK"
 
       - name: Data survives a restart
         run: |

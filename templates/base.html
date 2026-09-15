@@ -1,4 +1,4 @@
-{% load static tailwind_cli %}<!doctype html>
+<!doctype html>
 <html lang="en" class="h-full">
 <head>
   <meta charset="utf-8">
@@ -8,9 +8,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
-  {% tailwind_css %}
-  <script src="{% static 'vendor/htmx.min.js' %}" defer></script>
-  <script src="{% static 'vendor/alpine.min.js' %}" defer></script>
+  {% include "components/tailwind.html" %}
+  {# Pinned versions from jsDelivr; the integrity hash makes the browser reject any altered file. #}
+  <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.10/dist/htmx.min.js" integrity="sha384-H5SrcfygHmAuTDZphMHqBJLc3FhssKjG7w/CeCpFReSfwBWDTKpkzPP8c+cLsK+V" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.17.3/dist/cdn.min.js" integrity="sha384-/7syvHwR9PpZbxOwOnlTTl4DepN0R0q9aiGAu+D0AcTtZXmrNw0zgp+TzUlPgDx2" crossorigin="anonymous" defer></script>
   {% block head %}{% endblock %}
 </head>
 <body class="min-h-full font-sans antialiased {% block body_class %}bg-white text-slate-800{% endblock %}" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>

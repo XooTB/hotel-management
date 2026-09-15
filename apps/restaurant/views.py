@@ -10,6 +10,7 @@ from django.views.generic import CreateView, UpdateView
 
 from apps.accounts.permissions import RESTAURANT, role_required
 from apps.dashboard.utils import DashboardFormMixin
+from apps.htmx import is_htmx
 
 from .forms import MenuCategoryForm, MenuItemForm, OrderForm
 from .models import MenuCategory, MenuItem, Order, OrderItem
@@ -29,7 +30,7 @@ def _board_context():
 
 @role_required(RESTAURANT)
 def order_board(request):
-    template = "restaurant/partials/board.html" if request.htmx else "restaurant/order_board.html"
+    template = "restaurant/partials/board.html" if is_htmx(request) else "restaurant/order_board.html"
     return render(request, template, _board_context())
 
 
@@ -78,7 +79,7 @@ def order_set_status(request, pk):
         return HttpResponseBadRequest("Unknown status.")
     order.status = status
     order.save(update_fields=["status"])
-    if request.htmx:
+    if is_htmx(request):
         return render(request, "restaurant/partials/board.html", _board_context())
     return redirect("restaurant:order_list")
 
@@ -89,7 +90,7 @@ def order_mark_paid(request, pk):
     order = get_object_or_404(Order, pk=pk, charge_to_room=False)
     order.is_paid = True
     order.save(update_fields=["is_paid"])
-    if request.htmx:
+    if is_htmx(request):
         return render(request, "restaurant/partials/board.html", _board_context())
     return redirect("restaurant:order_list")
 
@@ -106,7 +107,7 @@ def menu_item_toggle(request, pk):
     item = get_object_or_404(MenuItem, pk=pk)
     item.is_available = not item.is_available
     item.save(update_fields=["is_available"])
-    if request.htmx:
+    if is_htmx(request):
         return render(request, "restaurant/partials/menu_item_row.html", {"item": item})
     return redirect("restaurant:menu")
 

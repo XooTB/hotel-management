@@ -11,6 +11,7 @@ from django.views.generic import CreateView, ListView, UpdateView
 from apps.accounts.permissions import HOUSEKEEPING, MANAGEMENT, role_required
 from apps.accounts.permissions import RoleRequiredMixin
 from apps.dashboard.utils import DashboardDeleteView, DashboardFormMixin
+from apps.htmx import is_htmx
 from apps.reservations.models import Reservation
 
 from .forms import RoomForm, RoomTypeForm
@@ -57,7 +58,7 @@ def room_set_status(request, pk):
         return HttpResponseBadRequest("Status cannot be changed manually.")
     room.status = new_status
     room.save(update_fields=["status"])
-    if request.htmx:
+    if is_htmx(request):
         room.current_stay = None
         return render(request, "rooms/partials/room_card.html", {"room": room, "manual_statuses": MANUAL_STATUSES})
     messages.success(request, f"{room} marked as {room.get_status_display().lower()}.")

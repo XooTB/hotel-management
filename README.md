@@ -34,8 +34,8 @@ Everyone can see their own shifts.
 ## Tech stack
 
 - **Backend:** Python 3.14, Django 6.1, PostgreSQL (SQLite for quick local development)
-- **Frontend:** server-rendered Django templates, **HTMX** (partial page updates), **Alpine.js** (small interactions), **Tailwind CSS v4** (standalone CLI, no Node), **Chart.js**
-- **Serving:** Gunicorn, WhiteNoise for static files
+- **Frontend:** server-rendered Django templates, **HTMX** (partial page updates), **Alpine.js** (small interactions), **Tailwind CSS v4** (browser build), **Chart.js**. All front-end libraries load from the jsDelivr CDN, pinned to exact versions with integrity hashes, so there is no build step and no static files to serve
+- **Serving:** Gunicorn. Every request goes through Django; the only files it serves are uploaded room photos
 - **Container:** Debian `python:3.14-slim-trixie`, PostgreSQL from Debian, `tini` as PID 1
 
 ## Quick start (Docker)
@@ -80,7 +80,7 @@ All demo accounts use the password **`demo12345`**.
 
 | Username | Role |
 |---|---|
-| `admin` | Manager + Django admin (`/admin/`) |
+| `admin` | Manager (superuser) |
 | `manager` | Manager |
 | `reception` | Receptionist |
 | `housekeeping` | Housekeeping |
@@ -94,7 +94,7 @@ All demo accounts use the password **`demo12345`**.
 | `DJANGO_SECRET_KEY` | generated | Set explicitly in real deployments |
 | `DJANGO_ALLOWED_HOSTS` | `*` | Comma-separated host names |
 | `DJANGO_CSRF_TRUSTED_ORIGINS` | – | e.g. `https://hotel.example.com` when behind HTTPS |
-| `DJANGO_SUPERUSER_USERNAME` / `_PASSWORD` / `_EMAIL` | – | Create an admin account on start |
+| `DJANGO_SUPERUSER_USERNAME` / `_PASSWORD` / `_EMAIL` | – | Create an extra manager (superuser) account on start |
 | `POSTGRES_DB` / `POSTGRES_USER` / `POSTGRES_PASSWORD` | `hotel` | Internal database credentials |
 | `GUNICORN_WORKERS` | `3` | Worker processes |
 | `TIME_ZONE` | `UTC` | Hotel time zone, e.g. `Asia/Kolkata` |
@@ -108,7 +108,6 @@ Requires [uv](https://docs.astral.sh/uv/).
 uv sync
 uv run python manage.py migrate
 uv run python manage.py seed_demo            # --reset to reload
-uv run python manage.py tailwind watch       # rebuilds CSS as you edit templates (separate terminal)
 uv run python manage.py runserver
 ```
 
@@ -147,8 +146,7 @@ apps/
   dashboard/            overview, reports, shared UI template tags, seed_demo command
   website/              public site and guest booking flow
 templates/              all HTML templates (base, website, dashboard sections, partials)
-assets/tailwind.css     Tailwind source and theme
-static/vendor/          HTMX, Alpine.js, Chart.js (bundled so the app works offline)
+templates/components/tailwind.html  Tailwind theme colours and component classes
 docker/entrypoint.sh    starts PostgreSQL and Gunicorn in the container
 scripts/wait-healthy.sh waits for the container health check (used by CI)
 .github/workflows/      CI: tests on PostgreSQL + container smoke test

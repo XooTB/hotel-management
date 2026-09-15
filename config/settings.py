@@ -26,15 +26,11 @@ ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,0.0.0.0")
 CSRF_TRUSTED_ORIGINS = env_list("DJANGO_CSRF_TRUSTED_ORIGINS")
 
 INSTALLED_APPS = [
-    "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
-    "django.contrib.staticfiles",
     "django.contrib.humanize",
-    "django_htmx",
-    "django_tailwind_cli",
     "apps.accounts",
     "apps.rooms",
     "apps.reservations",
@@ -48,14 +44,12 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "django_htmx.middleware.HtmxMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -105,22 +99,9 @@ TIME_ZONE = os.environ.get("TIME_ZONE", "UTC")
 USE_I18N = True
 USE_TZ = True
 
-STATIC_URL = "static/"
-STATICFILES_DIRS = [BASE_DIR / "static"]
-STATIC_ROOT = BASE_DIR / "staticfiles"
-STORAGES = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {
-        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"
-        if DEBUG
-        else "whitenoise.storage.CompressedManifestStaticFilesStorage"
-    },
-}
+# Front-end libraries come from the jsDelivr CDN, so the only files Django serves are uploads.
 MEDIA_URL = "media/"
 MEDIA_ROOT = Path(os.environ.get("MEDIA_ROOT", BASE_DIR / "media"))
-
-TAILWIND_CLI_SRC_CSS = "assets/tailwind.css"
-TAILWIND_CLI_DIST_CSS = "css/app.css"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")

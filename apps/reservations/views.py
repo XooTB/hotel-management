@@ -8,6 +8,7 @@ from django.views.decorators.http import require_POST
 
 from apps.accounts.permissions import FRONT_DESK, role_required
 from apps.dashboard.utils import paginate
+from apps.htmx import htmx_target
 from apps.website.forms import AvailabilityForm
 
 from . import services
@@ -54,7 +55,7 @@ def reservation_list(request):
         "view": view,
         "quick_views": [(key, label) for key, (label, _) in QUICK_VIEWS.items()],
     }
-    if request.htmx and request.htmx.target == "results":
+    if htmx_target(request) == "results":
         return render(request, "reservations/partials/table.html", context)
     return render(request, "reservations/list.html", context)
 

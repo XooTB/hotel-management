@@ -8,6 +8,7 @@ from django.views.generic import UpdateView
 
 from apps.accounts.permissions import HOUSEKEEPING, role_required
 from apps.dashboard.utils import DashboardFormMixin, paginate
+from apps.htmx import is_htmx
 
 from . import services
 from .forms import TaskForm
@@ -74,6 +75,6 @@ def task_set_status(request, pk):
     if status not in HousekeepingTask.Status.values:
         return HttpResponseBadRequest("Unknown status.")
     services.set_status(task, status)
-    if request.htmx:
+    if is_htmx(request):
         return render(request, "housekeeping/partials/task_row.html", {"task": task})
     return redirect("housekeeping:list")
