@@ -10,6 +10,7 @@ urlpatterns = [
     path("rooms/<slug:slug>/", views.room_detail, name="room_detail"),
     path("rooms/<slug:slug>/book/", views.book, name="book"),
     path("search/", views.search, name="search"),
+    path("dining/", views.dining, name="dining"),
     path("booking/manage/", views.lookup, name="lookup"),
     path("booking/<str:reference>/", views.manage, name="manage"),
     path("booking/<str:reference>/confirmed/", views.confirmation, name="confirmation"),

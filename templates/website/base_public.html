@@ -9,7 +9,7 @@
     </a>
     <nav class="hidden items-center gap-8 text-sm font-medium text-slate-600 md:flex">
       <a href="{% url 'website:room_list' %}" class="hover:text-brand-700">Rooms &amp; Suites</a>
-      <a href="{% url 'website:home' %}#dining" class="hover:text-brand-700">Dining</a>
+      <a href="{% url 'website:dining' %}" class="hover:text-brand-700">Dining</a>
       <a href="{% url 'website:lookup' %}" class="hover:text-brand-700">Manage booking</a>
       <a href="{% url 'website:search' %}" class="btn-gold">Book your stay</a>
     </nav>
@@ -17,7 +17,7 @@
   </div>
   <div x-show="open" x-cloak x-transition class="space-y-1 border-t border-slate-200 bg-white px-4 py-3 text-sm font-medium md:hidden">
     <a href="{% url 'website:room_list' %}" class="block rounded-lg px-3 py-2 hover:bg-slate-50">Rooms &amp; Suites</a>
-    <a href="{% url 'website:home' %}#dining" class="block rounded-lg px-3 py-2 hover:bg-slate-50">Dining</a>
+    <a href="{% url 'website:dining' %}" class="block rounded-lg px-3 py-2 hover:bg-slate-50">Dining</a>
     <a href="{% url 'website:lookup' %}" class="block rounded-lg px-3 py-2 hover:bg-slate-50">Manage booking</a>
     <a href="{% url 'website:search' %}" class="btn-gold mt-2 w-full">Book your stay</a>
   </div>

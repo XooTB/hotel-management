@@ -3,6 +3,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from apps.reservations.models import Reservation
+from apps.restaurant.models import MenuCategory, MenuItem
 from apps.testing import GUEST, days, make_room_type, make_rooms
 
 
@@ -57,3 +58,14 @@ class GuestBookingFlowTests(TestCase):
         response = self.client.get(reverse("website:search"))
         self.assertContains(response, "Pick your dates")
         self.assertContains(response, self.room_type.get_absolute_url())
+
+
+class DiningPageTests(TestCase):
+    def test_lists_available_dishes_by_category(self):
+        mains = MenuCategory.objects.create(name="Mains")
+        MenuItem.objects.create(category=mains, name="Grilled sea bass", price="24.00")
+        MenuItem.objects.create(category=mains, name="Off the menu", price="9.00", is_available=False)
+        response = self.client.get(reverse("website:dining"))
+        self.assertContains(response, "Mains")
+        self.assertContains(response, "Grilled sea bass")
+        self.assertNotContains(response, "Off the menu")

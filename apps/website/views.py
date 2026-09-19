@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.db.models import Prefetch
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404, redirect, render
@@ -9,7 +10,7 @@ from django.views.decorators.http import require_POST
 from apps.htmx import is_htmx
 from apps.reservations import services
 from apps.reservations.models import Reservation
-from apps.restaurant.models import MenuItem
+from apps.restaurant.models import MenuCategory, MenuItem
 from apps.rooms.models import RoomType
 
 from .forms import AvailabilityForm, BookingForm, LookupForm
@@ -50,9 +51,17 @@ def home(request):
     context = {
         "form": AvailabilityForm.with_defaults(),
         "room_types": RoomType.objects.filter(is_active=True).prefetch_related("amenities")[:3],
-        "dishes": MenuItem.objects.filter(is_available=True).exclude(image="").order_by("-price")[:4],
     }
     return render(request, "website/home.html", context)
+
+
+def dining(request):
+    available = MenuItem.objects.filter(is_available=True)
+    categories = (
+        MenuCategory.objects.filter(items__is_available=True).distinct()
+        .prefetch_related(Prefetch("items", queryset=available, to_attr="menu"))
+    )
+    return render(request, "website/dining.html", {"categories": categories})
 
 
 def room_list(request):
