@@ -16,7 +16,32 @@
     </form>
   </div>
 </section>
+<section class="border-b border-slate-200 bg-slate-50">
+  <div class="mx-auto grid max-w-7xl gap-6 px-4 py-6 sm:grid-cols-2 sm:px-6 lg:grid-cols-4 lg:px-8">
+    <div class="flex items-center gap-3"><span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-brand-50 text-brand-700">{% icon 'wallet' 'h-5 w-5' %}</span><div><p class="text-sm font-semibold text-slate-900">Pay at the hotel</p><p class="text-xs text-slate-600">No card needed to book</p></div></div>
+    <div class="flex items-center gap-3"><span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-brand-50 text-brand-700">{% icon 'sparkles' 'h-5 w-5' %}</span><div><p class="text-sm font-semibold text-slate-900">Free cancellation</p><p class="text-xs text-slate-600">Up until your arrival date</p></div></div>
+    <div class="flex items-center gap-3"><span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-brand-50 text-brand-700">{% icon 'bed' 'h-5 w-5' %}</span><div><p class="text-sm font-semibold text-slate-900">Check-in from {{ CHECK_IN_TIME }}</p><p class="text-xs text-slate-600">Check-out by {{ CHECK_OUT_TIME }}</p></div></div>
+    <div class="flex items-center gap-3"><span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-brand-50 text-brand-700">{% icon 'wifi' 'h-5 w-5' %}</span><div><p class="text-sm font-semibold text-slate-900">Free Wi-Fi</p><p class="text-xs text-slate-600">Everywhere in the hotel</p></div></div>
+  </div>
+</section>
+
 <section class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
   {% include "website/partials/search_results.html" %}
+</section>
+
+<section class="bg-slate-50 py-16">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <p class="text-sm font-semibold uppercase tracking-widest text-gold-500">Included with every stay</p>
+    <h2 class="mt-2 font-display text-3xl font-semibold text-brand-900">More than a room</h2>
+    <div class="mt-8 grid auto-rows-[13rem] gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {% include "website/partials/photo_tile.html" with src="img/site/pool.jpg" alt="Infinity pool with sun loungers above the sea" title="Infinity pool" caption="Open 7:00–21:00" css="sm:col-span-2" %}
+      {% include "website/partials/photo_tile.html" with src="img/site/terrace.jpg" alt="Restaurant terrace with tables set beside the sea" title="The Azure Table" caption="Breakfast from 6:30" %}
+      {% include "website/partials/photo_tile.html" with src="img/site/lounge.jpg" alt="Lobby lounge with armchairs and plants" title="The Lounge" caption="Coffee by day, cocktails by night" %}
+    </div>
+    <div class="mt-10 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+      <div><p class="font-semibold text-slate-900">Already booked?</p><p class="text-sm text-slate-600">Look up your reservation with your booking reference and email.</p></div>
+      <a href="{% url 'website:lookup' %}" class="btn-secondary">Manage my booking {% icon 'arrow-right' 'h-4 w-4' %}</a>
+    </div>
+  </div>
 </section>
 {% endblock %}

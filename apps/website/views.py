@@ -79,8 +79,12 @@ def search(request):
         data = form.cleaned_data
         nights = (data["check_out"] - data["check_in"]).days
         results = services.search_availability(data["check_in"], data["check_out"], data["guests"])
+    context = {"form": form, "results": results, "nights": nights}
+    if results is None:
+        # Before a search, browse the rooms instead of an empty page.
+        context["room_types"] = RoomType.objects.filter(is_active=True).prefetch_related("amenities")
     template = "website/partials/search_results.html" if is_htmx(request) else "website/search.html"
-    return render(request, template, {"form": form, "results": results, "nights": nights})
+    return render(request, template, context)
 
 
 def book(request, slug):

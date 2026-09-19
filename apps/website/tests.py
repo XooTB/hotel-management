@@ -52,3 +52,8 @@ class GuestBookingFlowTests(TestCase):
         response = self.client.get(reverse("website:search"), {"check_in": days(1), "check_out": days(2), "guests": 2})
         self.assertContains(response, self.room_type.name)
         self.assertContains(response, "Only 1 left")
+
+    def test_search_without_dates_lists_rooms(self):
+        response = self.client.get(reverse("website:search"))
+        self.assertContains(response, "Pick your dates")
+        self.assertContains(response, self.room_type.get_absolute_url())

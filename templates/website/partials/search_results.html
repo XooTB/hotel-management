@@ -5,7 +5,14 @@
         {% for field, errors in form.errors.items %}{% for error in errors %}<p>{{ error }}</p>{% endfor %}{% endfor %}
       </div>
     {% else %}
-      <p class="text-slate-500">Choose your dates and party size to see available rooms.</p>
+      <div>
+        <p class="text-sm font-semibold uppercase tracking-widest text-gold-500">Our rooms</p>
+        <h2 class="mt-2 font-display text-3xl font-semibold text-brand-900">Pick your dates to see prices and availability</h2>
+        <p class="mt-2 text-slate-600">In the meantime, here's where you could be staying. Rates shown are per night.</p>
+      </div>
+      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {% for room_type in room_types %}{% include "website/partials/room_card.html" %}{% empty %}<p class="text-slate-500">Rooms are coming soon.</p>{% endfor %}
+      </div>
     {% endif %}
   {% else %}
     <p class="text-sm text-slate-600">{{ nights }} night{{ nights|pluralize }} · {{ form.cleaned_data.check_in|date:"D j M" }} → {{ form.cleaned_data.check_out|date:"D j M Y" }} · {{ form.cleaned_data.guests }} guest{{ form.cleaned_data.guests|pluralize }}</p>
