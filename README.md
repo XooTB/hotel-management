@@ -105,11 +105,82 @@ On `docker stop` it shuts down Gunicorn and then PostgreSQL cleanly. Everything 
 | `DJANGO_SECRET_KEY` | generated | Set explicitly in real deployments |
 | `DJANGO_ALLOWED_HOSTS` | `*` | Comma-separated host names |
 | `DJANGO_CSRF_TRUSTED_ORIGINS` | – | e.g. `https://hotel.example.com` when behind HTTPS |
+| `DJANGO_SECURE_COOKIES` | `0` | `1` to mark session/CSRF cookies secure (HTTPS deployments) |
+| `DJANGO_BEHIND_PROXY` | `0` | `1` when a proxy terminates TLS (Fly.io, nginx) |
 | `DJANGO_SUPERUSER_USERNAME` / `_PASSWORD` / `_EMAIL` | – | Create an extra manager (superuser) account on start |
 | `POSTGRES_DB` / `POSTGRES_USER` / `POSTGRES_PASSWORD` | `hotel` | Internal database credentials |
 | `GUNICORN_WORKERS` | `3` | Worker processes |
 | `TIME_ZONE` | `UTC` | Hotel time zone, e.g. `Asia/Kolkata` |
 | `HOTEL_NAME`, `HOTEL_CURRENCY`, `HOTEL_TAX_RATE` | Grand Azure Hotel, `$`, `10` | Branding and tax (%) |
+
+## Deploying to Fly.io
+
+The same image runs on Fly.io as one machine with a persistent volume — the app
+and its PostgreSQL database stay together, exactly as in Docker Compose.
+`fly.toml` is in the repo; you need [flyctl](https://fly.io/docs/flyctl/install/)
+and a Fly account.
+
+1. **Pick an app name.** In `fly.toml`, replace `hotel-management` in both `app`
+   and `DJANGO_CSRF_TRUSTED_ORIGINS` with a name of your own (it must be unique
+   across Fly), and set `primary_region` to the region closest to you
+   (`fly platform regions` lists them).
+
+2. **Create the app** (don't use `fly launch` — it detects Django and offers
+   to provision a separate Fly Postgres database, which this setup doesn't use):
+
+   ```bash
+   fly apps create <your-app-name>
+   ```
+
+3. **Set the secret key** so it does not depend on the volume:
+
+   ```bash
+   fly secrets set DJANGO_SECRET_KEY="$(python -c 'import secrets; print(secrets.token_urlsafe(50))')"
+   ```
+
+4. **Create the volume** (1 GB is plenty; use the same region as `primary_region`):
+
+   ```bash
+   fly volumes create hotel_data --size 1 --region <your-region>
+   ```
+
+5. **Deploy** — `--ha=false` keeps it to a single machine, which matters because
+   the database lives inside it:
+
+   ```bash
+   fly deploy --ha=false
+   ```
+
+6. **Open the site:** `fly open`, then sign in at `/accounts/login/` with the
+   demo logins above. To add your own manager account, set the superuser
+   variables as secrets — the machine restarts and the entrypoint creates it:
+
+   ```bash
+   fly secrets set DJANGO_SUPERUSER_USERNAME=owner \
+                   DJANGO_SUPERUSER_PASSWORD='<a strong password>' \
+                   DJANGO_SUPERUSER_EMAIL=you@example.com
+   ```
+
+Useful afterwards: `fly logs`, `fly status`, `fly ssh console`, and
+`fly deploy --ha=false` again after every `git push`.
+
+### Notes on this setup
+
+- **One machine only.** Each machine gets its own volume, so a second one would
+  run a second, empty database. Keep `fly scale count 1` and always deploy with
+  `--ha=false`.
+- **No release command.** Migrations run from the container's entrypoint, since
+  the database only exists inside the machine that mounts the volume.
+- **Cold starts.** `min_machines_running = 0` lets Fly stop the machine when
+  nobody is using it (cheaper); the first request afterwards waits a few seconds
+  while PostgreSQL starts. Set it to `1` in `fly.toml` to keep the site warm.
+- **Demo data** is loaded on the first boot only. Set `DEMO_DATA = '0'` in
+  `fly.toml` for a clean production database.
+- **Backups:** `fly ssh console -C "runuser -u postgres -- pg_dump -h /var/run/postgresql hotel" > backup.sql`,
+  or snapshot the volume with `fly volumes snapshots create <volume-id>`.
+- **Management commands** over SSH need the database URL, which only the
+  entrypoint exports:
+  `fly ssh console -C "env DATABASE_URL=postgres://hotel:hotel@127.0.0.1:5432/hotel /opt/venv/bin/python /app/manage.py <command>"`.
 
 ## Local development
 

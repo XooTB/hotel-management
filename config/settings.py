@@ -111,6 +111,12 @@ if not DEBUG:
     SESSION_COOKIE_SECURE = env_bool("DJANGO_SECURE_COOKIES", False)
     CSRF_COOKIE_SECURE = env_bool("DJANGO_SECURE_COOKIES", False)
 
+# Behind a TLS-terminating proxy (Fly.io, nginx) the app is reached over plain
+# HTTP, so take the scheme and host from the proxy's forwarded headers.
+if env_bool("DJANGO_BEHIND_PROXY"):
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    USE_X_FORWARDED_HOST = True
+
 # Hotel-wide business settings
 HOTEL_NAME = os.environ.get("HOTEL_NAME", "Grand Azure Hotel")
 HOTEL_CURRENCY = os.environ.get("HOTEL_CURRENCY", "$")

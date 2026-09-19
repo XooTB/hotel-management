@@ -1,0 +1,43 @@
+
+app = 'grand-azure-hotel'
+primary_region = 'sin'
+
+[build]
+
+[env]
+  DJANGO_DEBUG = '0'
+  DJANGO_ALLOWED_HOSTS = '*'
+  DJANGO_CSRF_TRUSTED_ORIGINS = 'https://grand-azure-hotel.fly.dev'
+  DJANGO_SECURE_COOKIES = '1'
+  DJANGO_BEHIND_PROXY = '1'
+  DEMO_DATA = '1'
+  TIME_ZONE = 'UTC'
+  GUNICORN_WORKERS = '2'
+
+# The database, uploaded photos and the generated secret key all live here.
+[mounts]
+  source = 'hotel_data'
+  destination = '/var/lib/hotel'
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  auto_stop_machines = 'stop'
+  auto_start_machines = true
+  min_machines_running = 0          # set to 1 to keep the site warm (no cold start)
+
+  [[http_service.checks]]
+    grace_period = '90s'            # first boot initialises PostgreSQL and seeds demo data
+    interval = '15s'
+    timeout = '5s'
+    method = 'GET'
+    path = '/'
+
+# PostgreSQL needs a moment to shut down cleanly when the machine stops.
+kill_signal = 'SIGTERM'
+kill_timeout = '30s'
+swap_size_mb = 512
+
+[[vm]]
+  size = 'shared-cpu-1x'
+  memory = '1gb'
