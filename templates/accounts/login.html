@@ -1,9 +1,11 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Staff sign in · {{ HOTEL_NAME }}{% endblock %}
 {% block body %}
 <div class="grid min-h-screen lg:grid-cols-2">
   <div class="relative hidden overflow-hidden bg-brand-900 lg:block">
-    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(200,155,60,0.35),transparent_55%),radial-gradient(ellipse_at_bottom_right,rgba(47,139,214,0.4),transparent_55%)]"></div>
+    <img src="{% static 'img/site/night.jpg' %}" alt="" class="absolute inset-0 h-full w-full object-cover">
+    <div class="absolute inset-0 bg-linear-to-t from-brand-900 via-brand-900/50 to-brand-900/60"></div>
     <div class="relative flex h-full flex-col justify-between p-12">
       <a href="{% url 'website:home' %}" class="flex items-center gap-2.5 text-white">
         <span class="grid h-9 w-9 place-items-center rounded-full bg-white/10 text-gold-400">{% icon 'star' 'h-4 w-4' %}</span>

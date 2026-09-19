@@ -4,9 +4,12 @@ import random
 from datetime import datetime, time, timedelta
 from decimal import Decimal
 
+from django.conf import settings
+from django.core.files import File
 from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.utils import timezone
+from django.utils.text import slugify
 
 from apps.accounts.models import User
 from apps.billing.models import Invoice
@@ -18,6 +21,8 @@ from apps.rooms.models import Amenity, Room, RoomType
 from apps.staff.models import Shift
 
 PASSWORD = "demo12345"
+# Demo photos committed with the code: rooms/<room type slug>.jpg and menu/<slugified dish name>.jpg.
+PHOTO_DIR = settings.STATIC_ROOT / "img"
 Role = User.Role
 
 STAFF = [
@@ -96,6 +101,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, reset=False, **options):
         if RoomType.objects.exists() and not reset:
+            self._attach_photos()
             self.stdout.write(self.style.WARNING("Demo data already present; use --reset to reload it."))
             return
         self.rng = random.Random(42)
@@ -110,6 +116,7 @@ class Command(BaseCommand):
             self._create_walk_in_orders()
             self._create_housekeeping()
             self._create_shifts()
+        self._attach_photos()
         self.stdout.write(self.style.SUCCESS("Demo data loaded. Staff logins (password: %s):" % PASSWORD))
         for username, first, last, role, _ in STAFF:
             self.stdout.write(f"  {username:<14} {role.label}")
@@ -118,6 +125,18 @@ class Command(BaseCommand):
     def _at(self, day, hour_from=8, hour_to=20):
         moment = datetime.combine(day, time(self.rng.randint(hour_from, hour_to), self.rng.randint(0, 59)))
         return timezone.make_aware(moment)
+
+    def _attach_photos(self):
+        """Give demo room types and dishes without a photo their bundled one (also upgrades older databases)."""
+        for room_type in RoomType.objects.filter(image=""):
+            self._attach(room_type, PHOTO_DIR / "rooms" / f"{room_type.slug}.jpg")
+        for item in MenuItem.objects.filter(image=""):
+            self._attach(item, PHOTO_DIR / "menu" / f"{slugify(item.name)}.jpg")
+
+    def _attach(self, obj, path):
+        if path.exists():
+            with path.open("rb") as photo:
+                obj.image.save(path.name, File(photo), save=True)
 
     def _reset(self):
         Invoice.objects.all().delete()

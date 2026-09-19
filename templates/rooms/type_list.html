@@ -15,7 +15,12 @@
       <tbody class="divide-y divide-slate-100">
         {% for rt in room_types %}
         <tr>
-          <td><p class="font-medium text-slate-900">{{ rt.name }}</p><p class="max-w-md truncate text-xs text-slate-500">{{ rt.short_description }}</p></td>
+          <td>
+            <div class="flex items-center gap-4">
+              <div class="h-14 w-20 shrink-0 overflow-hidden rounded-lg">{% include "website/partials/room_image.html" with room_type=rt css="h-full" %}</div>
+              <div class="min-w-0"><p class="font-medium text-slate-900">{{ rt.name }}</p><p class="max-w-md truncate text-xs text-slate-500">{{ rt.short_description }}</p></div>
+            </div>
+          </td>
           <td class="text-right font-medium">{{ rt.nightly_rate|money }}</td>
           <td class="text-right">{{ rt.capacity }}</td>
           <td class="text-right">{{ rt.room_count }}</td>

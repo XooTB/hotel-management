@@ -15,7 +15,7 @@ The whole application, **including PostgreSQL**, ships as **one Docker container
 | Reservations | Search and filter (arrivals, departures, in-house), walk-in and phone bookings with a live availability panel, check-in with room picker, check-out, cancel, no-show |
 | Rooms | Room board grouped by floor with inline status changes; managers edit rooms and room types (rates, capacity, amenities, photo) |
 | Housekeeping | Tasks (cleaning, inspection, maintenance) with priority and assignee. Check-out creates a cleaning task automatically; finishing all tasks frees the room |
-| Restaurant | Order screen with live totals, a kitchen board that refreshes itself, dine-in and room-service orders, charge to room, menu availability toggles |
+| Restaurant | Menu with dish photos, order screen with live totals, a kitchen board that refreshes itself, dine-in and room-service orders, charge to room, menu availability toggles |
 | Billing | Invoice created at check-out (room nights plus charges to the room, plus tax), printable invoice, mark as paid (cash or card) |
 | Staff | Staff accounts with roles, weekly shift schedule with overlap checks |
 | Reports | Occupancy, revenue collected, average daily rate, restaurant sales, bookings by room type and channel, top menu items (Chart.js) |
@@ -34,8 +34,9 @@ Everyone can see their own shifts.
 ## Tech stack
 
 - **Backend:** Python 3.14, Django 6.1, PostgreSQL (SQLite for quick local development)
-- **Frontend:** server-rendered Django templates, **HTMX** (partial page updates), **Alpine.js** (small interactions), **Tailwind CSS v4** (browser build), **Chart.js**. All front-end libraries load from the jsDelivr CDN, pinned to exact versions with integrity hashes, so there is no build step and no static files to serve
-- **Serving:** Gunicorn. Every request goes through Django; the only files it serves are uploaded room photos
+- **Frontend:** server-rendered Django templates, **HTMX** (partial page updates), **Alpine.js** (small interactions), **Tailwind CSS v4** (browser build), **Chart.js**. All front-end libraries load from the jsDelivr CDN, pinned to exact versions with integrity hashes, so there is no build step
+- **Serving:** Gunicorn. Every request goes through Django, which also serves the site photos in `static/img/` and uploaded photos (no `collectstatic` step)
+- **Photos:** from Unsplash (free licence), see `static/img/CREDITS.md`. The demo seed attaches them to the room types and menu items; managers can replace any of them from the dashboard
 - **Container:** Debian `python:3.14-slim-trixie`, PostgreSQL from Debian, `tini` as PID 1
 
 ## Quick start

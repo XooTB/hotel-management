@@ -1,15 +1,20 @@
 {% extends "website/base_public.html" %}
+{% load static %}
 {% block title %}Manage booking · {{ HOTEL_NAME }}{% endblock %}
 {% block content %}
-<section class="mx-auto max-w-md px-4 py-16 sm:px-6">
-  <div class="text-center">
-    <h1 class="font-display text-3xl font-semibold text-brand-900">Manage your booking</h1>
-    <p class="mt-2 text-slate-600">Enter the reference from your confirmation email.</p>
+<section class="relative isolate overflow-hidden">
+  <img src="{% static 'img/site/lounge.jpg' %}" alt="" class="absolute inset-0 -z-10 h-full w-full object-cover">
+  <div class="absolute inset-0 -z-10 bg-brand-900/75"></div>
+  <div class="mx-auto max-w-md px-4 py-16 sm:px-6 sm:py-24">
+    <div class="text-center">
+      <h1 class="font-display text-3xl font-semibold text-white sm:text-4xl">Manage your booking</h1>
+      <p class="mt-2 text-white/80">Enter the reference from your confirmation email.</p>
+    </div>
+    <form method="post" class="card mt-8 space-y-5 p-6 shadow-2xl">
+      {% csrf_token %}
+      {% include "components/form_fields.html" with grid="grid-cols-1" %}
+      <button type="submit" class="btn-primary w-full">Find my booking</button>
+    </form>
   </div>
-  <form method="post" class="card mt-8 space-y-5 p-6">
-    {% csrf_token %}
-    {% include "components/form_fields.html" with grid="grid-cols-1" %}
-    <button type="submit" class="btn-primary w-full">Find my booking</button>
-  </form>
 </section>
 {% endblock %}

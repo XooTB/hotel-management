@@ -1,0 +1,8 @@
+{% load static %}
+<figure class="group relative overflow-hidden rounded-2xl bg-slate-200 {{ css }}">
+  <img src="{% static src %}" alt="{{ alt }}" loading="lazy" class="h-full w-full object-cover transition duration-700 group-hover:scale-105">
+  <figcaption class="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/70 via-black/20 to-transparent p-5 pt-16 text-white">
+    <p class="font-display text-lg font-semibold">{{ title }}</p>
+    {% if caption %}<p class="text-sm text-white/80">{{ caption }}</p>{% endif %}
+  </figcaption>
+</figure>

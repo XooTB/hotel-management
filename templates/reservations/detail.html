@@ -78,6 +78,13 @@
   </div>
 
   <div class="space-y-6">
+    <section class="card overflow-hidden">
+      {% include "website/partials/room_image.html" with room_type=reservation.room_type css="h-40" %}
+      <div class="p-4 text-sm">
+        <p class="font-semibold text-slate-900">{{ reservation.room_type.name }}</p>
+        <p class="text-xs text-slate-500">{% if reservation.room %}{{ reservation.room }}{% else %}Room assigned at check-in{% endif %} · {{ reservation.room_type.bed_type }} · {{ reservation.room_type.size_sqm }} m²</p>
+      </div>
+    </section>
     <section class="card p-6 text-sm">
       <h2 class="font-semibold text-slate-900">Guest</h2>
       <p class="mt-3 text-base font-medium text-slate-900">{{ reservation.guest_name }}</p>

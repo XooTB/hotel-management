@@ -1,0 +1,5 @@
+{% if item.image %}
+<img src="{{ item.image.url }}" alt="" loading="lazy" class="{{ css }} shrink-0 rounded-lg object-cover">
+{% else %}
+<span class="{{ css }} grid shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-400">{% icon 'utensils' 'h-5 w-5' %}</span>
+{% endif %}

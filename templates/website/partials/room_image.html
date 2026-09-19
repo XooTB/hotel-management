@@ -1,5 +1,7 @@
 {% if room_type.image %}
-<img src="{{ room_type.image.url }}" alt="{{ room_type.name }}" class="{{ css }} w-full object-cover">
+<div class="{{ css }} w-full overflow-hidden bg-slate-200">
+  <img src="{{ room_type.image.url }}" alt="{{ room_type.name }}" loading="{{ loading|default:'lazy' }}" class="h-full w-full object-cover transition duration-700 group-hover:scale-105">
+</div>
 {% else %}
 <div class="{{ css }} relative flex w-full items-end overflow-hidden bg-linear-to-br {{ room_type.placeholder_gradient }} p-5">
   <div class="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.35),transparent_40%),radial-gradient(circle_at_85%_10%,rgba(255,255,255,0.2),transparent_35%)]"></div>

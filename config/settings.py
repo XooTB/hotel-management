@@ -99,7 +99,10 @@ TIME_ZONE = os.environ.get("TIME_ZONE", "UTC")
 USE_I18N = True
 USE_TZ = True
 
-# Front-end libraries come from the jsDelivr CDN, so the only files Django serves are uploads.
+# Front-end libraries come from the jsDelivr CDN. Django serves two folders itself (no collectstatic):
+# the site photos committed under static/, and uploads under MEDIA_ROOT.
+STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "static"
 MEDIA_URL = "media/"
 MEDIA_ROOT = Path(os.environ.get("MEDIA_ROOT", BASE_DIR / "media"))
 

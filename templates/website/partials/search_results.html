@@ -10,8 +10,8 @@
   {% else %}
     <p class="text-sm text-slate-600">{{ nights }} night{{ nights|pluralize }} · {{ form.cleaned_data.check_in|date:"D j M" }} → {{ form.cleaned_data.check_out|date:"D j M Y" }} · {{ form.cleaned_data.guests }} guest{{ form.cleaned_data.guests|pluralize }}</p>
     {% for room_type in results %}
-    <article class="card grid overflow-hidden md:grid-cols-[18rem_1fr]">
-      {% include "website/partials/room_image.html" with css="h-48 md:h-full" %}
+    <article class="group card grid overflow-hidden md:grid-cols-[20rem_1fr]">
+      {% include "website/partials/room_image.html" with css="h-52 md:h-full md:min-h-56" %}
       <div class="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 class="font-display text-2xl font-semibold text-brand-900"><a href="{{ room_type.get_absolute_url }}" class="hover:underline">{{ room_type.name }}</a></h2>

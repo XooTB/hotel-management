@@ -8,7 +8,7 @@ from .models import MenuCategory, MenuItem, Order
 class MenuItemForm(forms.ModelForm):
     class Meta:
         model = MenuItem
-        fields = ["category", "name", "description", "price", "is_available"]
+        fields = ["category", "name", "description", "price", "image", "is_available"]
 
 
 class MenuCategoryForm(forms.ModelForm):

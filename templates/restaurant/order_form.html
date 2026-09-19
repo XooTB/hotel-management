@@ -17,6 +17,7 @@
       <ul class="divide-y divide-slate-100">
         {% for item in category.items.all %}
         <li class="flex items-center gap-4 px-5 py-3" x-init="prices[{{ item.pk }}] = {{ item.price|unlocalize }}; qty[{{ item.pk }}] = {{ quantities|get_item:item.pk|default:0 }}">
+          {% include "restaurant/partials/dish_thumb.html" with css="h-12 w-12" %}
           <div class="min-w-0 flex-1">
             <p class="font-medium text-slate-900">{{ item.name }}</p>
             {% if item.description %}<p class="truncate text-xs text-slate-500">{{ item.description }}</p>{% endif %}

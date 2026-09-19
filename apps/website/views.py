@@ -9,6 +9,7 @@ from django.views.decorators.http import require_POST
 from apps.htmx import is_htmx
 from apps.reservations import services
 from apps.reservations.models import Reservation
+from apps.restaurant.models import MenuItem
 from apps.rooms.models import RoomType
 
 from .forms import AvailabilityForm, BookingForm, LookupForm
@@ -49,6 +50,7 @@ def home(request):
     context = {
         "form": AvailabilityForm.with_defaults(),
         "room_types": RoomType.objects.filter(is_active=True).prefetch_related("amenities")[:3],
+        "dishes": MenuItem.objects.filter(is_available=True).exclude(image="").order_by("-price")[:4],
     }
     return render(request, "website/home.html", context)
 

@@ -9,7 +9,10 @@
     </div>
     {% badge reservation.status reservation.get_status_display %}
   </div>
-  <div class="card mt-8 p-6">{% include "website/partials/booking_summary.html" %}</div>
+  <div class="card mt-8 overflow-hidden">
+    {% include "website/partials/room_image.html" with room_type=reservation.room_type css="h-48 sm:h-56" loading="eager" %}
+    <div class="p-6">{% include "website/partials/booking_summary.html" %}</div>
+  </div>
 
   {% if reservation.can_cancel %}
   <div class="card mt-6 flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
