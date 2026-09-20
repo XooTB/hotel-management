@@ -34,6 +34,24 @@ jobs:
       - name: Run test suite
         run: uv run python manage.py test
 
+  styles:
+    name: Compiled CSS is up to date
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Install the Tailwind CLI
+        run: npm ci
+      - name: Rebuild static/css/app.css
+        run: ./scripts/build-css.sh
+      - name: Fail if the committed CSS is stale
+        run: |
+          git diff --exit-code -- static/css/app.css \
+            || { echo "::error::static/css/app.css is out of date - run scripts/build-css.sh and commit the result."; exit 1; }
+
   container:
     name: Container build & smoke test
     runs-on: ubuntu-latest
@@ -53,6 +71,7 @@ jobs:
           curl -fsS http://localhost:8000/rooms/ | grep -q "Deluxe King"
           curl -fsS -o /dev/null http://localhost:8000/accounts/login/
           curl -fsS http://localhost:8000/ | grep -q "cdn.jsdelivr.net/npm/htmx.org@"
+          curl -fsS "$(curl -fsS http://localhost:8000/ | grep -o '/static/css/app.css?v=[a-f0-9]*' | head -1 | sed 's|^|http://localhost:8000|')" | grep -q "\.btn-primary"
           echo "Pages OK"
 
       - name: Data survives a restart

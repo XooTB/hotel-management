@@ -8,3 +8,7 @@ media
 docs
 .playwright-mcp
 .github
+node_modules
+assets
+package.json
+package-lock.json

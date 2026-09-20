@@ -8,7 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
-  {% include "components/tailwind.html" %}
+  {# Tailwind, compiled ahead of time by scripts/build-css.sh: styled on first paint, no CDN needed. #}
+  <link rel="stylesheet" href="{% static_asset 'css/app.css' %}">
   {# Pinned versions from jsDelivr; the integrity hash makes the browser reject any altered file. #}
   <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.10/dist/htmx.min.js" integrity="sha384-H5SrcfygHmAuTDZphMHqBJLc3FhssKjG7w/CeCpFReSfwBWDTKpkzPP8c+cLsK+V" crossorigin="anonymous" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.17.3/dist/cdn.min.js" integrity="sha384-/7syvHwR9PpZbxOwOnlTTl4DepN0R0q9aiGAu+D0AcTtZXmrNw0zgp+TzUlPgDx2" crossorigin="anonymous" defer></script>

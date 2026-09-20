@@ -34,7 +34,8 @@ Everyone can see their own shifts.
 ## Tech stack
 
 - **Backend:** Python 3.14, Django 6.1, PostgreSQL (SQLite for quick local development)
-- **Frontend:** server-rendered Django templates, **HTMX** (partial page updates), **Alpine.js** (small interactions), **Tailwind CSS v4** (browser build), **Chart.js**. All front-end libraries load from the jsDelivr CDN, pinned to exact versions with integrity hashes, so there is no build step
+- **Frontend:** server-rendered Django templates, **HTMX** (partial page updates), **Alpine.js** (small interactions), **Tailwind CSS v4**, **Chart.js**
+- **Styling:** Tailwind is compiled ahead of time into `static/css/app.css`, which is committed and served by Django, so a page is styled on first paint and the CSS does not depend on a CDN. The scripts load from the jsDelivr CDN, pinned to exact versions with integrity hashes. Running or deploying the app needs no build step; only editing styles does — see [Changing the styling](#changing-the-styling)
 - **Serving:** Gunicorn. Every request goes through Django, which also serves the site photos in `static/img/` and uploaded photos (no `collectstatic` step)
 - **Photos:** from Unsplash (free licence), see `static/img/CREDITS.md`. The demo seed attaches them to the room types and menu items; managers can replace any of them from the dashboard
 - **Container:** Debian `python:3.14-slim-trixie`, PostgreSQL from Debian, `tini` as PID 1
@@ -229,12 +230,29 @@ apps/
   dashboard/            overview, reports, shared UI template tags, seed_demo command
   website/              public site and guest booking flow
 templates/              all HTML templates (base, website, dashboard sections, partials)
-templates/components/tailwind.html  Tailwind theme colours and component classes
+assets/app.css          Tailwind source: theme colours, custom utilities, component classes
+static/css/app.css      compiled stylesheet (committed; regenerate with scripts/build-css.sh)
+scripts/build-css.sh    rebuilds static/css/app.css from assets/app.css
 docker/entrypoint.sh    starts PostgreSQL and Gunicorn in the container
 scripts/wait-healthy.sh waits for the container health check (used by CI)
 .github/workflows/      CI: tests on PostgreSQL + container smoke test
 docs/diagrams.md        ER, use-case, class, sequence and state diagrams
 ```
+
+### Changing the styling
+
+The theme colours, custom utilities and component classes (`.btn-primary`, `.card`, `.badge`, …) live in `assets/app.css`. Tailwind compiles that file — together with every class name it finds in `templates/` and `apps/` — into `static/css/app.css`, which is committed to the repository.
+
+That compiled file is what the browser loads, so the dashboard is fully styled on the very first paint, even if the CDN is slow, blocked or unreachable. Django serves it with a one-day cache header and the `{% static_asset %}` tag appends a content hash, so a rebuilt stylesheet is never served from a stale cache.
+
+After editing `assets/app.css`, or after using a utility class that no template used before, rebuild and commit the result:
+
+```bash
+scripts/build-css.sh            # needs Node.js; installs the pinned Tailwind CLI on first run
+scripts/build-css.sh --watch    # rebuild automatically while you work
+```
+
+CI fails if `static/css/app.css` does not match what the source compiles to, so a forgotten rebuild cannot reach production.
 
 ### Design notes
 

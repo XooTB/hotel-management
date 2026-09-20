@@ -1,0 +1,11 @@
+{
+  "private": true,
+  "description": "Dev-only: the Tailwind CLI that compiles assets/app.css into the committed static/css/app.css. Not needed to run or deploy the app.",
+  "scripts": {
+    "build:css": "scripts/build-css.sh"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "4.3.3",
+    "tailwindcss": "4.3.3"
+  }
+}

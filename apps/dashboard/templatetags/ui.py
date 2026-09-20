@@ -1,4 +1,6 @@
+import hashlib
 from decimal import Decimal, InvalidOperation
+from functools import lru_cache
 
 from django import template
 from django.conf import settings
@@ -76,6 +78,31 @@ def icon(name, css="h-5 w-5"):
         f'stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="{css}" aria-hidden="true">'
         f"{paths}</svg>"
     )
+
+
+def _hash_asset(path):
+    """Short content hash of a file under STATIC_ROOT, or "" if it is missing."""
+    try:
+        return hashlib.sha256((settings.STATIC_ROOT / path).read_bytes()).hexdigest()[:10]
+    except OSError:
+        return ""
+
+
+_cached_hash_asset = lru_cache(maxsize=None)(_hash_asset)
+
+
+@register.simple_tag
+def static_asset(path):
+    """URL for a file in static/, fingerprinted so a redeploy is never served stale.
+
+    Django sends these files with a one-day cache header, so the query string is
+    what tells the browser that a rebuilt stylesheet is a different file.
+    """
+    url = f"{settings.STATIC_URL}{path}"
+    # Hashed once per process in production; re-read in development so a rebuilt
+    # stylesheet shows up without restarting the server.
+    fingerprint = _hash_asset(path) if settings.DEBUG else _cached_hash_asset(path)
+    return f"{url}?v={fingerprint}" if fingerprint else url
 
 
 @register.simple_tag
