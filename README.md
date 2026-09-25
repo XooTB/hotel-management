@@ -21,7 +21,7 @@ The system has two halves that share the same booking rules:
 - **Public website** — guests browse rooms, check live availability, book without an account (pay at the hotel), and look up or cancel a booking with their reference and email.
 - **Staff dashboard** — role-based screens for reservations, check-in and check-out, the room board, housekeeping, restaurant orders and the menu, invoices, staff accounts and shifts, and reports.
 
-**Contents:** [Quick start](#quick-start) · [Features](#features) · [Tech stack](#tech-stack) · [Configuration](#configuration) · [Local development](#local-development) · [Tests](#tests) · [Project structure](#project-structure) · [Design notes](#design-notes)
+**Contents:** [Quick start](#quick-start) · [Features](#features) · [Tech stack](#tech-stack) · [Configuration](#configuration) · [Project structure](#project-structure) · [Design notes](#design-notes)
 
 ## Quick start
 
@@ -97,7 +97,7 @@ Everyone can see their own shifts.
 
 - **Backend:** Python 3.14, Django 6.1, PostgreSQL (SQLite for quick local development)
 - **Frontend:** server-rendered Django templates, **HTMX** (partial page updates), **Alpine.js** (small interactions), **Tailwind CSS v4**, **Chart.js**
-- **Styling:** Tailwind is compiled ahead of time into `static/css/app.css`, which is committed and served by Django, so a page is styled on first paint and the CSS does not depend on a CDN. The scripts load from the jsDelivr CDN, pinned to exact versions with integrity hashes. Running or deploying the app needs no build step; only editing styles does — see [Changing the styling](#changing-the-styling)
+- **Styling:** Tailwind is compiled ahead of time into `static/css/app.css`, which is committed and served by Django, so a page is styled on first paint and the CSS does not depend on a CDN. The scripts load from the jsDelivr CDN, pinned to exact versions with integrity hashes. Running or deploying the app needs no build step; only editing styles does (`scripts/build-css.sh`)
 - **Serving:** Gunicorn. Every request goes through Django, which also serves the site photos in `static/img/` and uploaded photos (no `collectstatic` step)
 - **Photos:** from Unsplash (free licence), see `static/img/CREDITS.md`. The demo seed attaches them to the room types and menu items; managers can replace any of them from the dashboard
 - **Container:** Debian `python:3.14-slim-trixie`, PostgreSQL from Debian, `tini` as PID 1
@@ -144,52 +144,6 @@ The container is self-contained, so a real deployment is the same image with a f
   ```bash
   docker compose exec hotel runuser -u postgres -- pg_dump -h /var/run/postgresql hotel > backup.sql
   ```
-
-## Local development
-
-Requires [uv](https://docs.astral.sh/uv/).
-
-```bash
-uv sync
-uv run python manage.py migrate
-uv run python manage.py seed_demo            # --reset to reload
-uv run python manage.py runserver
-```
-
-Local development uses SQLite by default. To use PostgreSQL, set `DATABASE_URL=postgres://user:pass@localhost:5432/hotel`.
-
-### Changing the styling
-
-The theme colours, custom utilities and component classes (`.btn-primary`, `.card`, `.badge`, …) live in `assets/app.css`. Tailwind compiles that file — together with every class name it finds in `templates/` and `apps/` — into `static/css/app.css`, which is committed to the repository.
-
-That compiled file is what the browser loads, so the dashboard is fully styled on the very first paint, even if the CDN is slow, blocked or unreachable. Django serves it with a one-day cache header and the `{% static_asset %}` tag appends a content hash, so a rebuilt stylesheet is never served from a stale cache.
-
-After editing `assets/app.css`, or after using a utility class that no template used before, rebuild and commit the result:
-
-```bash
-scripts/build-css.sh            # needs Node.js; installs the pinned Tailwind CLI on first run
-scripts/build-css.sh --watch    # rebuild automatically while you work
-```
-
-CI fails if `static/css/app.css` does not match what the source compiles to, so a forgotten rebuild cannot reach production.
-
-## Tests
-
-```bash
-uv run python manage.py test
-```
-
-The tests cover:
-
-- **Availability:** back-to-back stays, busiest night counted correctly, overbooking prevented, cancellations free up rooms, rooms under maintenance excluded
-- **Validation:** stay rules and room capacity
-- **Stay lifecycle:** check-in, then check-out, then invoice plus housekeeping task
-- **Billing:** invoice totals and tax
-- **Housekeeping:** rooms freed when tasks finish
-- **Public booking:** booking, lookup and cancellation from the website
-- **Permissions:** role-based access control
-
-Every push to GitHub also runs the checks in `.github/workflows/ci.yml`: the test suite against a real PostgreSQL database, plus a build of the Docker image that starts the container, waits for its health check, requests the main pages and restarts it to confirm the data persists.
 
 ## Project structure
 
